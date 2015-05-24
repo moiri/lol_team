@@ -16,17 +16,25 @@ def fetch_api( args ):
     time.sleep(1)
     return
 
-def json_dump( file_name, json_data ):
+def json_dump( file_name, json_data, path=None ):
     "dumps a json data structure to a file as a json string"
-    json_file = os.path.abspath( os.path.join( data_dir, file_name ) )
+    if path == None:
+        json_file = os.path.abspath( os.path.join( data_dir, file_name ) )
+    else:
+        json_file = os.path.abspath( os.path.join( dir, path + file_name ) )
+
     with open(json_file, 'w') as _file:
         json.dump(json_data, _file)
     print "updated file " + json_file
     return
 
-def json_load( file_name ):
+def json_load( file_name, path=None ):
     "loads the json string from a file and returns a json data structure"
-    json_file = os.path.abspath( os.path.join( data_dir, file_name ) )
+    if path == None:
+        json_file = os.path.abspath( os.path.join( data_dir, file_name ) )
+    else:
+        json_file = os.path.abspath( os.path.join( dir, path + file_name ) )
+
     with open(json_file) as _file:
         json_data = json.load(_file)
     return json_data
