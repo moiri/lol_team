@@ -103,7 +103,8 @@ if [ -z "$output" ]; then
     output=${SCRIPTPATH}/${output_path}${output_def}${output_suffix}.json
 fi
 
-echo "fetch data from API: "${url_api}
+echo "fetch data from API: "${url_api}${id}
 json=$(curl --request GET $url)
+output=$(realpath $output)
 echo "saved in file "$output"\n"
 echo $json > $output

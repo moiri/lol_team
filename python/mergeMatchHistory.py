@@ -1,10 +1,12 @@
-# This script merges the new match history with the locally stored json data
+#!/usr/bin/python
+# This script merges the new match history with the locally stored json data and
+# fetches new match data
 import lib
 import sys
 
 team_filename = 'team.json'
 teams_new_filename = 'teams_new.json'
-new_elements_counter=0
+matches_new = []
 
 # execute the shell script to fetch the new team match history
 lib.fetch_api(['-t', str(0)])
@@ -25,7 +27,7 @@ for id in teams_new:
 # load old team match history
 team = lib.json_load( team_filename )
 
-# add new history elements to old match history and fetch match json files
+# merge match history
 for match_new in team_new['matchHistory']:
     addElement = True
     for match in team['matchHistory']:
@@ -33,24 +35,27 @@ for match_new in team_new['matchHistory']:
             addElement = False
             break;
     if addElement:
-        # execute the shell script to fetch the match info
-        lib.fetch_api(['-m', str(match_new['gameId'])])
-        # execute the shell script to fetch the match info with timeline
-        lib.fetch_api(['-m', str(match_new['gameId']), '-l'])
+        matches_new.append(match_new['gameId'])
         # add new history elements to old match history
         team['matchHistory'].append(match_new)
-        new_elements_counter += 1
         addElement = False
 
 # if there were changes, update the history file
-if new_elements_counter > 0:
+if len(matches_new) > 0:
     # sort the match history
     team['matchHistory'].sort(key=lambda match: match['date'], reverse=True)
     # replace the (small) match history in the new file with the complete one
     team_new['matchHistory'] = team['matchHistory'];
-    print str(new_elements_counter) + " new elements added"
+    print str(len(matches_new)) + " new match history elements added"
 else:
-    print "no new entries available"
+    print "nothing to update in mach history"
 
 # save new team data to file (including the complete match history)
 lib.json_dump( team_filename, team_new )
+
+# fetch the new match files
+for matchId in matches_new:
+    # execute the shell script to fetch the match info
+    lib.fetch_api(['-m', str(matchId)])
+    # execute the shell script to fetch the match info with timeline
+    lib.fetch_api(['-m', str(matchId), '-l'])
