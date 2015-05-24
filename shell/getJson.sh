@@ -23,7 +23,7 @@ or an explicit url, status information are returned.
 
 Options:
 -h, --help                display this usage message and exit
--t, --team [ID]           get team info by ID (ID=0 selects team Laureicheibe) (*)
+-t, --team [ID]           get team info by ID (ID=0 selects team from the file private/team) (*)
 -m, --match [ID]          get match info by ID (*)
 -l, --timeline            add timeline to JSON object (*)
 -o, --output [FILE]       write output to file
@@ -55,7 +55,7 @@ while [ $# -gt 0 ] ; do
             url_api="v2.4/team/"
             id=$2
             if [ "$id" = "0" ] ; then
-                id="TEAM-106e2ea0-959c-11e3-a2ca-782bcb497d6f"
+                id=$(cat $SCRIPTPATH/../private/team)
             fi
             shift
             # output_def=${my_date}_${id}_team
