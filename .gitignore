@@ -2,3 +2,4 @@ private
 teams_new.json
 team_temp.json
 *.swp
+*.pyc

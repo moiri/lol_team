@@ -58,7 +58,8 @@ while [ $# -gt 0 ] ; do
                 id="TEAM-106e2ea0-959c-11e3-a2ca-782bcb497d6f"
             fi
             shift
-            output_def=${my_date}_${id}_team
+            # output_def=${my_date}_${id}_team
+            output_def="teams_new"
             ;;
         -m|--match)
             url_api="v2.2/match/"

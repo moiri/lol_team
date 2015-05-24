@@ -1,39 +1,31 @@
 # This script merges the new match history with the locally stored json data
-
-import json
-import os
+import lib
 import sys
-import subprocess
-import time
 
-dir = os.path.dirname(__file__) # get absolute file path
+team_filename = 'team.json'
+teams_new_filename = 'teams_new.json'
+new_elements_counter=0
 
 # execute the shell script to fetch the new team match history
-shellfile = os.path.join(dir, '../shell/getJson.sh')
-infile = os.path.join(dir, '../data/teams_new.json')
-subprocess.call([shellfile, '-t', str(0), '-o', infile])
-time.sleep(1)
+lib.fetch_api(['-t', str(0)])
 
 # load new match history as json file
-with open(infile) as data_file:
-    teams = json.load(data_file)
+teams_new = lib.json_load( teams_new_filename )
 
 # only continue if there is one team inside the file
-if len(teams) > 1:
-    print "Only one team is expected but " + str(len(teams)) + \
+if len(teams_new) > 1:
+    print "Only one team is expected but " + str(len(teams_new)) + \
         " are stored in the file"
     sys.exit()
 
-for id in teams:
-    team_new = teams[id]
+# extract the team
+for id in teams_new:
+    team_new = teams_new[id]
 
 # load old team match history
-team_file = os.path.join(dir, '../data/team.json')
-with open(team_file) as data_file:
-    team = json.load(data_file)
+team = lib.json_load( team_filename )
 
 # add new history elements to old match history and fetch match json files
-counter=0
 for match_new in team_new['matchHistory']:
     addElement = True
     for match in team['matchHistory']:
@@ -42,26 +34,23 @@ for match_new in team_new['matchHistory']:
             break;
     if addElement:
         # execute the shell script to fetch the match info
-        subprocess.call([shellfile, '-m', str(match_new['gameId'])])
-        time.sleep(1)
+        lib.fetch_api(['-m', str(match_new['gameId'])])
         # execute the shell script to fetch the match info with timeline
-        subprocess.call([shellfile, '-m', str(match_new['gameId']), '-l'])
-        time.sleep(1)
+        lib.fetch_api(['-m', str(match_new['gameId']), '-l'])
         # add new history elements to old match history
         team['matchHistory'].append(match_new)
-        counter = counter + 1
+        new_elements_counter += 1
         addElement = False
 
 # if there were changes, update the history file
-if counter > 0:
+if new_elements_counter > 0:
     # sort the match history
     team['matchHistory'].sort(key=lambda match: match['date'], reverse=True)
     # replace the (small) match history in the new file with the complete one
     team_new['matchHistory'] = team['matchHistory'];
-    print str(counter) + " new elements added"
+    print str(new_elements_counter) + " new elements added"
 else:
     print "no new entries available"
 
 # save new team data to file (including the complete match history)
-with open(team_file, 'w') as data_file:
-    json.dump(team_new, data_file)
+lib.json_dump( team_filename, team_new )
