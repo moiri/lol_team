@@ -54,6 +54,9 @@ for match_new in team_new['matchHistory']:
 
 # if there were changes, update the history file
 if counter > 0:
+    # sort the list
+    team['matchHistory'].sort(key=lambda match: match['date'], reverse=True)
+    # print change message and save to file
     print str(counter) + " new elements added"
     with open(team_file, 'w') as data_file:
         json.dump(team, data_file)
