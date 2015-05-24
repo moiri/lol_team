@@ -17,7 +17,7 @@ def getTeamParticipantId(match, team):
 
 
 dir = os.path.dirname(__file__)
-infile = os.path.join(dir, '../data/teams.json')
+infile = os.path.join(dir, '../data/teams_new.json')
 with open(infile) as data_file:
     teams = json.load(data_file)
 infile = os.path.join(dir, '../data/matchId.json')
