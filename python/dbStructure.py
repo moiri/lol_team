@@ -46,17 +46,14 @@ db = MySQLdb.connect(
 cursor = db.cursor()
 
 # create games table
-query = "CREATE TABLE IF NOT EXISTS games (dummy INT(1) NULL);"
+query = "CREATE TABLE IF NOT EXISTS games (" + \
+        "win TINYINT(1) UNSIGNED," + \
+        "opposingTeamName VARCHAR(50));"
 if debug: print query
 else: cursor.execute(query)
 
 # add columns to games table
 query = genQueryAlterTable('games', match, 'matchId')
-if debug: print query
-else: cursor.execute(query)
-
-# remove dummy column from games table
-query = "ALTER TABLE games DROP dummy;"
 if debug: print query
 else: cursor.execute(query)
 
