@@ -23,7 +23,7 @@ or an explicit url, status information are returned.
 
 Options:
 -h, --help                display this usage message and exit
--t, --team [ID]           get team info by ID (default team: Laureicheibe) (*)
+-t, --team [ID]           get team info by ID (ID=0 selects team Laureicheibe) (*)
 -m, --match [ID]          get match info by ID (*)
 -l, --timeline            add timeline to JSON object (*)
 -o, --output [FILE]       write output to file
@@ -32,8 +32,10 @@ EOF
 
     exit 1
 }
-
-key="api_key="$(cat ../private/key)
+SCRIPT=$(readlink -f "$0")
+# Absolute path this script is in, thus /home/user/bin
+SCRIPTPATH=$(dirname "$SCRIPT")
+key="api_key="$(cat $SCRIPTPATH/../private/key)
 url_base="https://euw.api.pvp.net/api/lol/euw/"
 url_api=""
 option=""
@@ -52,11 +54,10 @@ while [ $# -gt 0 ] ; do
         -t|--team)
             url_api="v2.4/team/"
             id=$2
-            if [ -z "$id" ] ; then
+            if [ "$id" = "0" ] ; then
                 id="TEAM-106e2ea0-959c-11e3-a2ca-782bcb497d6f"
-            else
-                shift
             fi
+            shift
             output_def=${my_date}_${id}_team
             ;;
         -m|--match)
@@ -91,14 +92,17 @@ done
 if [ -n "$url" ] ; then
     echo use explicit url
 elif [ -z "$url_api" ] ; then
+    url_api="status"
     output_def=${my_date}_status
     url="http://status.leagueoflegends.com/shards"
 else
     url=$url_base$url_api$id?$option$key
 fi
 if [ -z "$output" ]; then
-    output=${output_path}${output_def}${output_suffix}.json
+    output=${SCRIPTPATH}/${output_path}${output_def}${output_suffix}.json
 fi
 
+echo "fetch data from API: "${url_api}
 json=$(curl --request GET $url)
+echo "saved in file "$output"\n"
 echo $json > $output
