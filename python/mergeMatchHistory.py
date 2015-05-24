@@ -35,7 +35,7 @@ for match_new in team_new['matchHistory']:
             addElement = False
             break;
     if addElement:
-        matches_new.append(match_new['gameId'])
+        matches_new.append(match_new)
         # add new history elements to old match history
         team['matchHistory'].append(match_new)
         addElement = False
@@ -46,16 +46,19 @@ if len(matches_new) > 0:
     team['matchHistory'].sort(key=lambda match: match['date'], reverse=True)
     # replace the (small) match history in the new file with the complete one
     team_new['matchHistory'] = team['matchHistory'];
-    print str(len(matches_new)) + " new match history elements added"
+    print str(len(matches_new)) + " new match history elements added\n"
 else:
-    print "nothing to update in mach history"
+    print "nothing to update in mach history\n"
 
 # save new team data to file (including the complete match history)
 lib.json_dump( team_filename, team_new )
 
 # fetch the new match files
-for matchId in matches_new:
+for match_new in matches_new:
     # execute the shell script to fetch the match info
-    lib.fetch_api(['-m', str(matchId)])
+    lib.fetch_api(['-m', str(match_new['gameId'])])
     # execute the shell script to fetch the match info with timeline
-    lib.fetch_api(['-m', str(matchId), '-l'])
+    lib.fetch_api(['-m', str(match_new['gameId']), '-l'])
+    # insert data
+    lib.updateGame(match_new['gameId'], match_new['win'],
+            match_new['opposingTeamName'])
