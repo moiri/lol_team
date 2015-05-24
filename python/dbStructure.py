@@ -14,7 +14,7 @@ def genQueryAlterTable(table_name, json_data, primary=None):
             if key == primary:
                 query += " PRIMARY KEY"
             query += ","
-        elif type(json_data[key]) is unicode:
+        elif type(json_data[key]) is str or type(json_data[key]) is unicode:
             query += " ADD " + key + " VARCHAR(50),"
         elif type(json_data[key]) is bool:
             query += " ADD " + key + " TINYINT(1) UNSIGNED,"
@@ -29,7 +29,7 @@ debug = False
 
 # load database cretentials
 db_creds = lib.json_load('db.json', '../private/')
-user_lvl = 2 # only SELECT
+user_lvl = 2 # all privileges
 
 # load match data
 match = lib.json_load('2117389806_match.json')
