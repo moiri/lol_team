@@ -22,11 +22,12 @@ all (*) parameters are ignored. If API usage is not specified with parameters
 or an explicit url, status information are returned.
 
 Options:
--h, --help                display this usage message and exit
--t, --team [ID]           get team info by ID (ID=0 selects team from the file private/team) (*)
--m, --match [ID]          get match info by ID (*)
--l, --timeline            add timeline to JSON object (*)
--o, --output [FILE]       write output to file
+-h, --help            display this usage message and exit
+-t, --team [ID]       get team info by ID (ID=0 selects the teamId from the
+                      file ../private/team) (*)
+-m, --match [ID]      get match info by ID (*)
+-l, --timeline        add timeline to JSON object (*)
+-o, --output [FILE]   write output to file
 
 EOF
 
