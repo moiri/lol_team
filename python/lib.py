@@ -44,7 +44,7 @@ def createTables(debug=False):
 
     # create champ_summoner_game table
     query = "CREATE TABLE IF NOT EXISTS champ_summoner_game (" + \
-            "matchId INT(15) UNSIGNED);"
+            "matchId INT(11) UNSIGNED, summonerId INT(11) UNSIGNED);"
     if debug: print query
     else: cursor.execute(query)
 
@@ -166,6 +166,10 @@ def updateGame(gameId, win, opponent, debug=False):
         json_temp = guy.copy()
         json_temp.update(guy['stats'])
         json_temp['matchId'] = gameId
+        for guyId in match['participantIdentities']:
+            if guyId['participantId'] == guy['participantId']:
+                json_temp['summonerId'] = guyId['player']['summonerId']
+                break
         query = genQueryInsert('champ_summoner_game', json_temp)
         if debug: print query
         else: cursor.execute(query)
