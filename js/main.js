@@ -11,16 +11,26 @@ $(document).ready(function() {
                 '<div id="summoner-' + id + '" class="summoner">' + name + '</div>'
             );
         });
+        $('.leftColumn').append(
+            '<div id="summoner-0" class="summoner clear">clear</div>'
+        );
         $('.summoner').click(function(){
+            $('.summoner').removeClass('active');
             $(this).toggleClass('active');
+            id = $(this).attr('id').split('-');
+            if (id[1] === '0')
+                getWinrate();
+            else
+                getWinrate(id[1]);
         });
     });
     getWinrate();
 });
 
 function getWinrate(summonerId) {
+    var url, data;
     url = 'python/winrate/winrate_champions';
-    $.getJSON(url, summonerId, function(json) {
+    $.getJSON(url, { summonerId: summonerId }, function(json) {
         $('.midColumn').html(
             '<table id="champs" class="tablesorter">' +
                 '<thead><tr>' +

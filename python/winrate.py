@@ -2,6 +2,7 @@
 import lib
 import json
 import MySQLdb
+import mod_python
 
 def winrate_summoners():
     # lead team and summoner information
@@ -47,8 +48,13 @@ def winrate_summoners():
     db.close()
     return json.dumps(json_data)
 
-def winrate_champions():
+def winrate_champions(req):
     # load team information
+    user_data = mod_python.util.FieldStorage(req)
+    try:
+        summonerId = user_data['summonerId'].value
+    except Exception, e:
+        summonerId = None
     team = lib.json_load('team.json', '../data/')
     championStats = lib.json_load('champion.json', '../data/')
 
@@ -66,7 +72,10 @@ def winrate_champions():
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
 
-    query = "SELECT DISTINCT championId FROM champ_summoner_game;"
+    query = "SELECT DISTINCT championId FROM champ_summoner_game"
+    if summonerId:
+        query += " WHERE summonerId='" + summonerId + "'"
+    query += ';'
     cursor.execute(query)
     champIds = cursor.fetchall()
 
@@ -74,7 +83,10 @@ def winrate_champions():
     json_data['champions'] = []
     for champId in champIds:
         query = "SELECT winner FROM champ_summoner_game WHERE championId='" + \
-                str(champId[0]) + "';"
+                str(champId[0]) + "'"
+        if summonerId:
+            query += " AND summonerId='" + summonerId + "'"
+        query += ';'
         cursor.execute(query)
         rows = cursor.fetchall()
         winCount = 0
