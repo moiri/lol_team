@@ -60,6 +60,12 @@ def createTables(debug=False):
     if debug: print query
     else: cursor.execute(query)
 
+    # add champion position to champ_game_table
+    query = genQueryAlterTable( 'champ_summoner_game',
+            match['participants'][0]['timeline'], None)
+    if debug: print query
+    else: cursor.execute(query)
+
     # disconnect from server
     db.close()
     return
@@ -165,6 +171,7 @@ def updateGame(gameId, win, opponent, debug=False):
     for guy in match['participants']:
         json_temp = guy.copy()
         json_temp.update(guy['stats'])
+        if 'timeline' in guy: json_temp.update(guy['timeline'])
         json_temp['matchId'] = gameId
         for guyId in match['participantIdentities']:
             if guyId['participantId'] == guy['participantId']:
