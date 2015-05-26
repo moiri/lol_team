@@ -2,7 +2,14 @@ $(document).ready(function() {
     var url ;
     url = 'data/team.json';
     $.getJSON(url, function(team) {
-        $('.header').html(team.name);
+        $('.header').html(
+            team.name + " " + team.teamStatDetails[0].wins + ":"
+            + team.teamStatDetails[0].losses
+            + " (" + (team.teamStatDetails[0].wins
+                      / (team.teamStatDetails[0].wins
+                         + team.teamStatDetails[0].losses)).toFixed(2)
+            + ")"
+        );
     });
     url = 'data/summoners.json';
     $.getJSON(url, function(summoners) {
