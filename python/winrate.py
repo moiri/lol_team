@@ -72,9 +72,10 @@ def winrate_champions(req):
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
 
-    query = "SELECT DISTINCT championId FROM champ_summoner_game"
+    query = "SELECT DISTINCT championId FROM champ_summoner_game WHERE 1"
+    query += " AND opposingTeam='0'"
     if summonerId:
-        query += " WHERE summonerId='" + summonerId + "'"
+        query += " AND summonerId='" + summonerId + "'"
     query += ';'
     cursor.execute(query)
     champIds = cursor.fetchall()
@@ -84,6 +85,7 @@ def winrate_champions(req):
     for champId in champIds:
         query = "SELECT winner FROM champ_summoner_game WHERE championId='" + \
                 str(champId[0]) + "'"
+        query += " AND opposingTeam='0'"
         if summonerId:
             query += " AND summonerId='" + summonerId + "'"
         query += ';'

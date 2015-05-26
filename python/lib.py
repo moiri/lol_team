@@ -44,7 +44,8 @@ def createTables(debug=False):
 
     # create champ_summoner_game table
     query = "CREATE TABLE IF NOT EXISTS champ_summoner_game (" + \
-            "matchId INT(11) UNSIGNED, summonerId INT(11) UNSIGNED);"
+            "matchId INT(11) UNSIGNED, summonerId INT(11) UNSIGNED," +\
+            "opposingTeam TINYINT(1) UNSIGNED);"
     if debug: print query
     else: cursor.execute(query)
 
@@ -148,6 +149,7 @@ def updateGame(gameId, win, opponent, debug=False):
 
     # load match data
     match = json_load(str(gameId) + '_match.json')
+    members = json_load('summoners.json')
 
     # Open database connection
     db = MySQLdb.connect(
@@ -177,6 +179,9 @@ def updateGame(gameId, win, opponent, debug=False):
             if guyId['participantId'] == guy['participantId']:
                 json_temp['summonerId'] = guyId['player']['summonerId']
                 break
+        json_temp['opposingTeam'] = True
+        if str(json_temp['summonerId']) in members:
+            json_temp['opposingTeam'] = False
         query = genQueryInsert('champ_summoner_game', json_temp)
         if debug: print query
         else: cursor.execute(query)
