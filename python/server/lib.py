@@ -7,8 +7,9 @@ import time
 import MySQLdb
 
 dir = os.path.dirname(__file__) # get absolute file path
-data_dir = os.path.join(dir, '../data/')
-shell_dir = os.path.join(dir, '../shell/')
+data_dir = os.path.join(dir, '../../data/')
+shell_dir = os.path.join(dir, '../../shell/')
+private_dir = os.path.join(dir, '../../private/')
 
 def createTables(debug=False):
     "function to creat db structure"
