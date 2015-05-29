@@ -14,7 +14,7 @@ private_dir = os.path.join(dir, '../../private/')
 def createTables(debug=False):
     "function to creat db structure"
     # load database cretentials
-    db_creds = json_load('db.json', '../private/')
+    db_creds = json_load('db.json', private_dir)
     user_lvl = 2 # all privileges
 
     # load match data
@@ -145,7 +145,7 @@ def updateGame(gameId, win, opponent, debug=False):
     "function to the database with thje data of a game"
 
     # load database cretentials
-    db_creds = json_load('db.json', '../private/')
+    db_creds = json_load('db.json', private_dir)
     user_lvl = 1 # only SELECT, INSERT, UPDATE
 
     # load match data
