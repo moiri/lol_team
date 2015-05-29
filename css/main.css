@@ -32,22 +32,22 @@ div.midColumn {
 div.rightColumn {
 
 }
-div.summoner {
+div.summoner, div.clear {
     padding: 2px;
     cursor: pointer;
     width:100%;
 }
-div.summoner:hover, div.summoner.active.clear:hover {
+div.summoner:hover, div.clear:hover {
     color: #8DBDD8;
-}
-div.summoner.clear {
-    font-style:italic;
 }
 div.summoner.active {
     background-color: #8DBDD8;
     color: black;
 }
-div.summoner.active.clear {
-    background-color: transparent;
-    color: #E6EEEE;
+div.clear {
+    margin-top:10px;
+    font-style: italic;
+}
+div.opposingTeam {
+    margin-top:10px;
 }

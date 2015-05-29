@@ -55,10 +55,12 @@ def winrate_summoners():
 def winrate_champions(req):
     # load team information
     user_data = mod_python.util.FieldStorage(req)
-    try:
+    summonerId = None
+    if 'summonerId' in user_data:
         summonerId = user_data['summonerId'].value
-    except Exception, e:
-        summonerId = None
+    opposingTeam = '0';
+    if 'opposingTeam' in user_data:
+        opposingTeam = user_data['opposingTeam'].value
     team = lib.json_load('team.json')
     championStats = lib.json_load('champion.json')
 
@@ -77,7 +79,7 @@ def winrate_champions(req):
     cursor = db.cursor()
 
     query = "SELECT DISTINCT championId FROM champ_summoner_game WHERE 1"
-    query += " AND opposingTeam='0'"
+    query += " AND opposingTeam='" + opposingTeam + "'"
     if summonerId:
         query += " AND summonerId='" + summonerId + "'"
     query += ';'
@@ -89,7 +91,7 @@ def winrate_champions(req):
     for champId in champIds:
         query = "SELECT winner FROM champ_summoner_game WHERE championId='" + \
                 str(champId[0]) + "'"
-        query += " AND opposingTeam='0'"
+        query += " AND opposingTeam='" + opposingTeam + "'"
         if summonerId:
             query += " AND summonerId='" + summonerId + "'"
         query += ';'

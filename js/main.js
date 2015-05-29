@@ -19,25 +19,40 @@ $(document).ready(function() {
             );
         });
         $('.leftColumn').append(
-            '<div id="summoner-0" class="summoner clear">clear</div>'
+            '<div id="summoner-opposingTeam" class="summoner opposingTeam">Opposing Team</div>'
         );
-        $('.summoner').click(function(){
+        $('.leftColumn').append(
+            '<div id="clear" class="clear">clear</div>'
+        );
+        $('.summoner').click(function() {
+            var data, id
+            data = {}
+            if (!$(this).hasClass('active')) {
+                $('.summoner').removeClass('active');
+                $(this).addClass('active');
+                id = $(this).attr('id').split('-');
+                if (id[1] === 'opposingTeam')
+                    data.opposingTeam = '1'
+                else
+                    data.summonerId = id[1];
+            }
+            else {
+                $('.summoner').removeClass('active');
+            }
+            getWinrate(data);
+        });
+        $('.clear').click(function() {
             $('.summoner').removeClass('active');
-            $(this).toggleClass('active');
-            id = $(this).attr('id').split('-');
-            if (id[1] === '0')
-                getWinrate();
-            else
-                getWinrate(id[1]);
+            getWinrate();
         });
     });
     getWinrate();
 });
 
-function getWinrate(summonerId) {
-    var url, data;
+function getWinrate(data) {
+    var url;
     url = 'python/winrate/winrate_champions';
-    $.getJSON(url, { summonerId: summonerId }, function(json) {
+    $.getJSON(url, data, function(json) {
         $('.midColumn').html(
             '<table id="champs" class="tablesorter">' +
                 '<thead><tr>' +
