@@ -93,6 +93,7 @@ def winrate_champions(req):
 
     json_data = {}
     json_data['champions'] = []
+    json_data['fields'] = ['Name', '# Games', '# Wins', 'Win Rate']
     for champId in champIds:
         query = "SELECT winner FROM champ_summoner_game WHERE championId='" + \
                 str(champId[0]) + "'"

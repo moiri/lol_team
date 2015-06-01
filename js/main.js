@@ -58,22 +58,22 @@ function getWinrate(data) {
     var url;
     url = 'python/winrate/winrate_champions';
     $.getJSON(url, data, function(json) {
-        $('.midColumn').html(
-            '<table id="champs" class="tablesorter">' +
-                '<thead><tr>' +
-                    '<th>Name</th><th># Games</th><th># Wins</th><th>Win Rate</th>' +
-                '</tr></thead><tbody></tbody>' +
+        var table_title = '<table id="champs" class="tablesorter">' +
+                '<thead><tr>';
+        for (attr in json.fields) {
+            table_title += '<th>' + json.fields[attr] + '</th>';
+        }
+        table_title += '</tr></thead><tbody></tbody>' +
             '</table>'
-        );
+        $('.midColumn').html(table_title);
         $.each(json.champions, function (idx, champion) {
-            $('table#champs > tbody').append(
-                '<tr id="champion-"' + champion.id + '>' +
-                '<td>' + champion.name + '</td>' +
-                '<td>' + champion.stats.gameCount + '</td>' +
-                '<td>' + champion.stats.winCount + '</td>' +
-                '<td>' + champion.stats.winRate + '</td>' +
-                '</tr>'
-            );
+            var table = '<tr id="champion-"' + champion.id + '>'
+                + '<td>' + champion.name + '</td>';
+            for (attr in champion.stats) {
+                table += '<td>' + champion.stats[attr] + '</td>';
+            }
+            table += '</tr>';
+            $('table#champs > tbody').append(table);
         });
         $("table#champs").tablesorter({
             // sort on the first column and third column, order asc 
