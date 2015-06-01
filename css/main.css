@@ -10,6 +10,9 @@ body {
 div.leftColumn, div.rightColumn, div.header, div.footer {
     color: #E6EEEE;
 }
+div.leftColumn, div.rightColumn {
+    padding:10px;
+}
 div.header, div.footer {
     width:100%;
     text-align:center;
@@ -24,23 +27,22 @@ div.footer {
 }
 div.leftColumn {
     float:left;
-    padding:10px;
+}
+div.rightColumn {
+    float:right;
 }
 div.midColumn {
 
 }
-div.rightColumn {
-
-}
-div.summoner, div.clear {
+div.summoner, div.clear, div.filter {
     padding: 2px;
     cursor: pointer;
     width:100%;
 }
-div.summoner:hover, div.clear:hover {
+div.summoner:hover, div.clear:hover, div.filter:hover {
     color: #8DBDD8;
 }
-div.summoner.active {
+div.summoner.active, div.filter.active {
     background-color: #8DBDD8;
     color: black;
 }

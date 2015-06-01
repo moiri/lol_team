@@ -1,5 +1,9 @@
 $(document).ready(function() {
-    var url ;
+    var url, data;
+    data = {};
+    data.summonerId = null;
+    data.opposingTeam = '0';
+    data.lane = null;
     url = 'data/team.json';
     $.getJSON(url, function(team) {
         $('.header').html(
@@ -25,8 +29,9 @@ $(document).ready(function() {
             '<div id="clear" class="clear">clear</div>'
         );
         $('.summoner').click(function() {
-            var data, id
-            data = {}
+            var id;
+            data.opposingTeam = '0';
+            data.summonerId = null;
             if (!$(this).hasClass('active')) {
                 $('.summoner').removeClass('active');
                 $(this).addClass('active');
@@ -37,14 +42,38 @@ $(document).ready(function() {
                     data.summonerId = id[1];
             }
             else {
-                $('.summoner').removeClass('active');
+                $(this).removeClass('active');
             }
             getWinrate(data);
         });
         $('.clear').click(function() {
+            data = {};
             $('.summoner').removeClass('active');
+            $('.filter').removeClass('active');
             getWinrate();
         });
+    });
+    $('.rightColumn').append(
+        '<div id="filter-TOP"class="filter">Top</div>'
+        + '<div id="filter-JUNGLE"class="filter">Jungle</div>'
+        + '<div id="filter-MIDDLE"class="filter">Mid</div>'
+        + '<div id="filter-BOTTOM"class="filter">Bottom</div>'
+        // + '<div id="filter-BOTTOM-DUO_CARRY"class="filter">Adc</div>'
+        // + '<div id="filter-BOTTOM-DUO_SUPPORT"class="filter">Support</div>'
+    );
+    $('.filter').click(function () {
+        var id;
+        data.lane = null;
+        if (!$(this).hasClass('active')) {
+            $('.filter').removeClass('active');
+            $(this).addClass('active');
+            id = $(this).attr('id').split('-');
+            data.lane = id[1];
+        }
+        else {
+            $(this).removeClass('active');
+        }
+        getWinrate(data);
     });
     getWinrate();
 });
@@ -75,5 +104,6 @@ function getWinrate(data) {
             sortList: [[1,1]]
         });
         $('.midColumn').css({'margin-left': $('.leftColumn').outerWidth()});
+        $('.midColumn').css({'margin-right': $('.rightColumn').outerWidth()});
     });
 }

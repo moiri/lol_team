@@ -61,6 +61,9 @@ def winrate_champions(req):
     opposingTeam = '0';
     if 'opposingTeam' in user_data:
         opposingTeam = user_data['opposingTeam'].value
+    lane = None
+    if 'lane' in user_data:
+        lane = user_data['lane'].value
     team = lib.json_load('team.json')
     championStats = lib.json_load('champion.json')
 
@@ -82,6 +85,8 @@ def winrate_champions(req):
     query += " AND opposingTeam='" + opposingTeam + "'"
     if summonerId:
         query += " AND summonerId='" + summonerId + "'"
+    if lane:
+        query += " AND lane='" + lane + "'"
     query += ';'
     cursor.execute(query)
     champIds = cursor.fetchall()
@@ -94,6 +99,8 @@ def winrate_champions(req):
         query += " AND opposingTeam='" + opposingTeam + "'"
         if summonerId:
             query += " AND summonerId='" + summonerId + "'"
+        if lane:
+            query += " AND lane='" + lane + "'"
         query += ';'
         cursor.execute(query)
         rows = cursor.fetchall()
