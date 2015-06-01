@@ -53,28 +53,6 @@ $(document).ready(function() {
             getWinrate();
         });
     });
-    $('.rightColumn').append(
-        '<div id="filter-TOP"class="filter">Top</div>'
-        + '<div id="filter-JUNGLE"class="filter">Jungle</div>'
-        + '<div id="filter-MIDDLE"class="filter">Mid</div>'
-        + '<div id="filter-BOTTOM"class="filter">Bottom</div>'
-        // + '<div id="filter-BOTTOM-DUO_CARRY"class="filter">Adc</div>'
-        // + '<div id="filter-BOTTOM-DUO_SUPPORT"class="filter">Support</div>'
-    );
-    $('.filter').click(function () {
-        var id;
-        data.lane = null;
-        if (!$(this).hasClass('active')) {
-            $('.filter').removeClass('active');
-            $(this).addClass('active');
-            id = $(this).attr('id').split('-');
-            data.lane = id[1];
-        }
-        else {
-            $(this).removeClass('active');
-        }
-        getWinrate(data);
-    });
     getWinrate();
 });
 
