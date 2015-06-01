@@ -40,12 +40,12 @@ for match_new in team_new['matchHistory']:
         team['matchHistory'].append(match_new)
         addElement = False
 
-# if there were changes, update the history file
+# sort the match history
+team['matchHistory'].sort(key=lambda match: match['date'], reverse=True)
+# replace the (small) match history in the new file with the complete one
+team_new['matchHistory'] = team['matchHistory'];
+
 if len(matches_new) > 0:
-    # sort the match history
-    team['matchHistory'].sort(key=lambda match: match['date'], reverse=True)
-    # replace the (small) match history in the new file with the complete one
-    team_new['matchHistory'] = team['matchHistory'];
     print str(len(matches_new)) + " new match history elements added\n"
 else:
     print "nothing to update in mach history\n"
