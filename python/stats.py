@@ -94,9 +94,10 @@ def stats_champions(req):
     json_data = {}
     json_data['champions'] = []
     json_data['fields'] = ['Name', '# Games', '# Wins', 'Win Rate', "Kills", 
-            "Deaths", "Assists", "KDA"]
+            "Deaths", "Assists", "KDA", "Gold", "CS"]
     for champId in champIds:
-        query = "SELECT winner, kills, deaths, assists" \
+        query = "SELECT winner, kills, deaths, assists, goldEarned," \
+                + " minionsKilled, neutralMinionsKilled" \
                 + " FROM champ_summoner_game" \
                 + " WHERE championId='" + str(champId[0]) + "'" \
                 + query_where_clause + ';'
@@ -106,11 +107,15 @@ def stats_champions(req):
         kill_sum = 0
         death_sum = 0
         assist_sum = 0
+        gold_sum = 0
+        cs_sum = 0
         for row in rows:
             winCount += row[0]
             kill_sum += row[1]
             death_sum += row[2]
             assist_sum += row[3]
+            gold_sum += row[4]
+            cs_sum += row[5] + row[6]
 
         for key in championStats['data']:
             if championStats['data'][key]['id'] == champId[0]:
@@ -129,6 +134,8 @@ def stats_champions(req):
         if death_sum > 0:
             kda = round(float(kill_sum + assist_sum) / float(death_sum), 2)
         champion['stats'].append(kda)
+        champion['stats'].append(round(float(gold_sum) / float(len(rows))))
+        champion['stats'].append(round(float(cs_sum) / float(len(rows))))
         json_data['champions'].append(champion)
 
     # disconnect from server
