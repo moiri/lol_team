@@ -56,7 +56,7 @@ $(document).ready(function() {
 
 function getWinrate(data) {
     var url;
-    url = 'python/winrate/winrate_champions';
+    url = 'python/stats/stats_champions';
     $.getJSON(url, data, function(json) {
         var table_title = '<table id="champs" class="tablesorter">' +
                 '<thead><tr>';
@@ -70,6 +70,8 @@ function getWinrate(data) {
             var table = '<tr id="champion-"' + champion.id + '>'
                 + '<td>' + champion.name + '</td>';
             for (attr in champion.stats) {
+                if (champion.stats[attr] === "Infinity")
+                    champion.stats[attr] = Infinity;
                 table += '<td>' + champion.stats[attr] + '</td>';
             }
             table += '</tr>';

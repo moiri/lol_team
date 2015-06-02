@@ -52,7 +52,7 @@ def winrate_summoners():
     db.close()
     return json.dumps(json_data)
 
-def winrate_champions(req):
+def stats_champions(req):
     # load team information
     user_data = mod_python.util.FieldStorage(req)
     summonerId = None
@@ -81,33 +81,36 @@ def winrate_champions(req):
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
 
-    query = "SELECT DISTINCT championId FROM champ_summoner_game WHERE 1"
-    query += " AND opposingTeam='" + opposingTeam + "'"
+    query_where_clause = " AND opposingTeam='" + opposingTeam + "'"
     if summonerId:
-        query += " AND summonerId='" + summonerId + "'"
+        query_where_clause += " AND summonerId='" + summonerId + "'"
     if lane:
-        query += " AND lane='" + lane + "'"
-    query += ';'
+        query_where_clause += " AND lane='" + lane + "'"
+    query = "SELECT DISTINCT championId FROM champ_summoner_game WHERE 1"
+    query += query_where_clause + ';'
     cursor.execute(query)
     champIds = cursor.fetchall()
 
     json_data = {}
     json_data['champions'] = []
-    json_data['fields'] = ['Name', '# Games', '# Wins', 'Win Rate']
+    json_data['fields'] = ['Name', '# Games', '# Wins', 'Win Rate', "Kills", 
+            "Deaths", "Assists", "KDA"]
     for champId in champIds:
-        query = "SELECT winner FROM champ_summoner_game WHERE championId='" + \
-                str(champId[0]) + "'"
-        query += " AND opposingTeam='" + opposingTeam + "'"
-        if summonerId:
-            query += " AND summonerId='" + summonerId + "'"
-        if lane:
-            query += " AND lane='" + lane + "'"
-        query += ';'
+        query = "SELECT winner, kills, deaths, assists" \
+                + " FROM champ_summoner_game" \
+                + " WHERE championId='" + str(champId[0]) + "'" \
+                + query_where_clause + ';'
         cursor.execute(query)
         rows = cursor.fetchall()
         winCount = 0
+        kill_sum = 0
+        death_sum = 0
+        assist_sum = 0
         for row in rows:
             winCount += row[0]
+            kill_sum += row[1]
+            death_sum += row[2]
+            assist_sum += row[3]
 
         for key in championStats['data']:
             if championStats['data'][key]['id'] == champId[0]:
@@ -115,10 +118,17 @@ def winrate_champions(req):
         champion = {}
         champion['id'] = champId[0]
         champion['name'] = name
-        champion['stats'] = {}
-        champion['stats']['gameCount'] = len(rows)
-        champion['stats']['winCount'] = winCount
-        champion['stats']['winRate'] = round(float(winCount) / float(len(rows)), 2)
+        champion['stats'] = []
+        champion['stats'].append(len(rows))
+        champion['stats'].append(winCount)
+        champion['stats'].append(round(float(winCount) / float(len(rows)), 2))
+        champion['stats'].append(round(float(kill_sum) / float(len(rows)), 1))
+        champion['stats'].append(round(float(death_sum) / float(len(rows)), 1))
+        champion['stats'].append(round(float(assist_sum) / float(len(rows)), 1))
+        kda = "Infinity"
+        if death_sum > 0:
+            kda = round(float(kill_sum + assist_sum) / float(death_sum), 2)
+        champion['stats'].append(kda)
         json_data['champions'].append(champion)
 
     # disconnect from server
