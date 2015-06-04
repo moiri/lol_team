@@ -1,5 +1,6 @@
 private
 teams_new.json
 team_temp.json
+plugin-src
 *.swp
 *.pyc
