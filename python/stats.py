@@ -95,6 +95,8 @@ def stats_champions(req):
     json_data['champions'] = []
     json_data['fields'] = ['Name', '# Games', '# Wins', 'Win Rate', "Kills", 
             "Deaths", "Assists", "KDA", "Gold", "CS"]
+    winCount_summoners = 0
+    gameCount_summoners = 0
     for champId in champIds:
         query = "SELECT winner, kills, deaths, assists, goldEarned," \
                 + " minionsKilled, neutralMinionsKilled" \
@@ -117,6 +119,9 @@ def stats_champions(req):
             gold_sum += row[4]
             cs_sum += row[5] + row[6]
 
+        winCount_summoners += winCount
+        gameCount_summoners += len(rows)
+
         for key in championStats['data']:
             if championStats['data'][key]['id'] == champId[0]:
                 name = championStats['data'][key]['name']
@@ -138,6 +143,15 @@ def stats_champions(req):
         champion['stats'].append(round(float(cs_sum) / float(len(rows))))
         json_data['champions'].append(champion)
 
+    json_data['summoner'] = {}
+    json_data['summoner']['id'] = summonerId
+    json_data['summoner']['wins'] = winCount_summoners
+    json_data['summoner']['losses'] = gameCount_summoners - winCount_summoners
+    if summonerId == None:
+        json_data['summoner']['wins'] /= 5
+        json_data['summoner']['losses'] /= 5
+    json_data['summoner']['winRate'] = round(float(winCount_summoners)\
+            / float(gameCount_summoners), 2)
     # disconnect from server
     db.close()
     # json_data['champions'].sort(key=lambda champ: champ['stats']['gameCount'], reverse=True)

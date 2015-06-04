@@ -4,68 +4,64 @@ $(document).ready(function() {
     data.opposingTeam = '0';
     data.lane = null;
     $.getJSON('data/team.json', function(team) {
-        $('.header').html(
-            team.name + " " + team.teamStatDetails[0].wins + ":"
-            + team.teamStatDetails[0].losses
-            + " (" + (team.teamStatDetails[0].wins
-                      / (team.teamStatDetails[0].wins
-                         + team.teamStatDetails[0].losses)).toFixed(2)
-            + ")"
-        );
         $.getJSON('data/summoners.json', function(summoners) {
+            $('.sidebar').append(
+                '<li><a id="summoner-all" href="#">' + team.name + '</a></li>'
+                + '<li role="presentation" class="divider"></li>'
+            );
             $.each(team.roster.memberList, function (idx, member) {
-                $('.leftColumn').append(
-                    '<div id="summoner-' + member.playerId
-                    + '" class="summoner">' + summoners[member.playerId] + '</div>'
+                $('.sidebar').append(
+                    '<li><a id="summoner-' + member.playerId
+                    + '" href="#">' + summoners[member.playerId] + '</a></li>'
                 );
             });
-            $('.leftColumn').append(
-                '<div id="summoner-opposingTeam" class="summoner opposingTeam">Opposing Team</div>'
+            $('.sidebar').append(
+                '<li role="presentation" class="divider"></li>'
+                + '<li><a id="summoner-opposingTeam" href="#">Opponents</a></li>'
             );
-            $('.leftColumn').append(
-                '<div id="clear" class="clear">clear</div>'
-            );
-            $('.summoner').click(function() {
-                var id;
+            $('[id|="summoner"]').click(function() {
+                var id, summonerName;
                 data.opposingTeam = '0';
                 data.summonerId = null;
-                if (!$(this).hasClass('active')) {
-                    $('.summoner').removeClass('active');
-                    $(this).addClass('active');
-                    id = $(this).attr('id').split('-');
-                    if (id[1] === 'opposingTeam')
-                        data.opposingTeam = '1'
-                    else
-                        data.summonerId = id[1];
+
+                id = $(this).attr('id').split('-');
+                if (id[1] === 'opposingTeam') {
+                    data.opposingTeam = '1'
+                    summonerName = "Opponents";
                 }
+                else if (id[1] === 'all')
+                    summonerName = team.name;
                 else {
-                    $(this).removeClass('active');
+                    data.summonerId = id[1];
+                    summonerName = summoners[id[1]]
                 }
-                getWinrate(data);
+
+                getWinrate(data, summonerName);
             });
-            $('.clear').click(function() {
-                data = {};
-                $('.summoner').removeClass('active');
-                $('.filter').removeClass('active');
-                getWinrate();
-            });
-            getWinrate();
+            getWinrate(data, team.name);
         });
     });
 });
 
-function getWinrate(data) {
+function getWinrate(data, summonerName) {
     var url;
     url = 'python/stats/stats_champions';
     $.getJSON(url, data, function(json) {
-        var table_title = '<table id="champs" class="tablesorter">' +
+        var table_title;
+
+        $('#title-name').html(summonerName);
+        $('#title-wins').html(json.summoner.wins);
+        $('#title-losses').html(json.summoner.losses);
+        $('#title-winRate').html(json.summoner.winRate);
+
+        table_title = '<table id="champs" class="table table-striped table-condensed tablesorter">' +
                 '<thead><tr>';
         for (attr in json.fields) {
             table_title += '<th>' + json.fields[attr] + '</th>';
         }
         table_title += '</tr></thead><tbody></tbody>' +
             '</table>'
-        $('.midColumn').html(table_title);
+        $('.content').html(table_title);
         $.each(json.champions, function (idx, champion) {
             var table = '<tr id="champion-"' + champion.id + '>'
                 + '<td>' + champion.name + '</td>';
@@ -81,7 +77,5 @@ function getWinrate(data) {
             // sort on the first column and third column, order asc 
             sortList: [[1,1]]
         });
-        $('.midColumn').css({'margin-left': $('.leftColumn').outerWidth()});
-        $('.midColumn').css({'margin-right': $('.rightColumn').outerWidth()});
     });
 }
