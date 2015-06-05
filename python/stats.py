@@ -57,9 +57,9 @@ def stats_champions(req):
     opposingTeam = '0';
     if 'opposingTeam' in user_data:
         opposingTeam = user_data['opposingTeam'].value
-    lane = None
-    if 'lane' in user_data:
-        lane = user_data['lane'].value
+    role = None
+    if 'role' in user_data:
+        role = user_data['role'].value
     team = lib.json_load('team.json')
     championStats = lib.json_load('champion.json')
 
@@ -80,8 +80,16 @@ def stats_champions(req):
     query_where_clause = " AND opposingTeam='" + opposingTeam + "'"
     if summonerId:
         query_where_clause += " AND summonerId='" + summonerId + "'"
-    if lane:
-        query_where_clause += " AND lane='" + lane + "'"
+    if role == 'top':
+        query_where_clause += " AND (lane='TOP' OR lane='BOTTOM') AND role='SOLO'"
+    elif role == 'jungle':
+        query_where_clause += " AND lane='JUNGLE'"
+    elif role == 'mid':
+        query_where_clause += " AND lane='MIDDLE' AND role='SOLO'"
+    elif role == 'adc':
+        query_where_clause += " AND role='DUO_CARRY'"
+    elif role == 'support':
+        query_where_clause += " AND role='DUO_SUPPORT'"
     query = "SELECT DISTINCT championId FROM champ_summoner_game WHERE 1"
     query += query_where_clause + ';'
     cursor.execute(query)

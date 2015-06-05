@@ -2,20 +2,20 @@ $(document).ready(function() {
     var data = {};
     data.summonerId = null;
     data.opposingTeam = '0';
-    data.lane = null;
+    data.role = null;
     $.getJSON('data/team.json', function(team) {
         $.getJSON('data/summoners.json', function(summoners) {
-            $('.sidebar').append(
+            $('.summoners').append(
                 '<li><a id="summoner-all" href="#">' + team.name + '</a></li>'
                 + '<li role="presentation" class="divider"></li>'
             );
             $.each(team.roster.memberList, function (idx, member) {
-                $('.sidebar').append(
+                $('.summoners').append(
                     '<li><a id="summoner-' + member.playerId
                     + '" href="#">' + summoners[member.playerId] + '</a></li>'
                 );
             });
-            $('.sidebar').append(
+            $('.summoners').append(
                 '<li role="presentation" class="divider"></li>'
                 + '<li><a id="summoner-opposingTeam" href="#">Opponents</a></li>'
             );
@@ -38,6 +38,12 @@ $(document).ready(function() {
 
                 getWinrate(data, summonerName);
             });
+            $('[id|="role"]').click(function() {
+                data.role = null;
+                id = $(this).attr('id').split('-');
+                data.role = id[1];
+                getWinrate(data);
+            });
             getWinrate(data, team.name);
         });
     });
@@ -49,7 +55,7 @@ function getWinrate(data, summonerName) {
     $.getJSON(url, data, function(json) {
         var table_title;
 
-        $('#title-name').html(summonerName);
+        if (summonerName != undefined) $('#title-name').html(summonerName);
         $('#title-wins').html(json.summoner.wins);
         $('#title-losses').html(json.summoner.losses);
         $('#title-winRate').html(json.summoner.winRate);

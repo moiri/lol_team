@@ -26,9 +26,9 @@
         <div class="row">
             <div class="col-lg-1"></div>
             <div class="col-lg-11">
-                <h2><span id="title-name"></span> <small><span id="title-wins">
-                        </span>:<span id="title-losses">
-                        </span> (<span id="title-winRate">
+                <h2><span id="title-name">Teamname</span> <small><span id="title-wins">0
+                        </span>:<span id="title-losses">0
+                        </span> (<span id="title-winRate">0.00
                         </span>)</small></h2>
             </div>
         </div>
@@ -40,7 +40,23 @@
                         Summoners
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu sidebar" role="menu"></ul>
+                    <ul class="dropdown-menu summoners" role="menu"></ul>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default dropdown-toggle" 
+                        data-toggle="dropdown" aria-expanded="false">
+                        Role
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu role" role="menu">
+                        <li><a id="role-all" href="#">All</a></li>
+                        <li role="presentation" class="divider"></li>
+                        <li><a id="role-top" href="#">Top</a></li>
+                        <li><a id="role-jungle" href="#">Jungle</a></li>
+                        <li><a id="role-mid" href="#">Mid</a></li>
+                        <li><a id="role-adc" href="#">ADC</a></li>
+                        <li><a id="role-support" href="#">Support</a></li>
+                    </ul>
                 </div>
             </div>
             <div class="col-lg-11 content"></div>
