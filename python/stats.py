@@ -1,12 +1,8 @@
 #!/usr/bin/python
-import sys
-import os
-dir = os.path.dirname(__file__) # get absolute file path
-sys.path.insert(0, os.path.join(dir, 'server'))
 import lib
 import json
 import MySQLdb
-import mod_python
+import mod_python #read GET data
 
 def winrate_summoners():
     # lead team and summoner information
@@ -14,7 +10,7 @@ def winrate_summoners():
     summoners = lib.json_load('summoners.json')
 
     # load database cretentials
-    db_creds = lib.json_load('db.json', private_dir)
+    db_creds = lib.json_load('db.json', lib.private_dir)
     user_lvl = 0 # only SELECT
 
     # Open database connection

@@ -45,7 +45,7 @@ id=""
 output=""
 output_def="status"
 output_suffix=""
-output_path="../data/"
+output_path="../../data/"
 my_date=$(echo $(date +%Y%m%d-%H%M%S))
 while [ $# -gt 0 ] ; do
     case "$1" in

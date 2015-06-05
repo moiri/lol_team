@@ -1,8 +1,7 @@
 #!/usr/bin/python
 # This script merges the new match history with the locally stored json data and
 # fetches new match data
-import lib
-import sys
+import lib_server as lib
 
 team_filename = 'team.json'
 teams_new_filename = 'teams_new.json'

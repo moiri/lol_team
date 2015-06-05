@@ -1,24 +1,27 @@
 #!/usr/bin/python
-# a library of useful functions
+# a library of useful server functions
 import os
+import sys
 import json
 import subprocess
 import time
 import MySQLdb
 
 dir = os.path.dirname(__file__) # get absolute file path
-data_dir = os.path.join(dir, '../../data/')
-shell_dir = os.path.join(dir, '../../shell/')
-private_dir = os.path.join(dir, '../../private/')
+shell_dir = os.path.join(dir, '../shell/')
+sys.path.insert(0, os.path.join(dir, '../../python'))
+import lib
+json_load = lib.json_load
+json_dump = lib.json_dump
 
 def createTables(debug=False):
     "function to creat db structure"
     # load database cretentials
-    db_creds = json_load('db.json', private_dir)
+    db_creds = lib.json_load('db.json', private_dir)
     user_lvl = 2 # all privileges
 
     # load match data
-    match = json_load('2117389806_match.json')
+    match = lib.json_load('2117389806_match.json')
 
     # Open database connection
     db = MySQLdb.connect(
@@ -118,39 +121,16 @@ def genQueryInsert(table_name, json_data):
     query += ");"
     return query
 
-def json_dump( file_name, json_data, path=None ):
-    "dumps a json data structure to a file as a json string"
-    if path == None:
-        json_file = os.path.abspath( os.path.join( data_dir, file_name ) )
-    else:
-        json_file = os.path.abspath( os.path.join( dir, path + file_name ) )
-
-    with open(json_file, 'w') as _file:
-        json.dump(json_data, _file)
-    print "updated file " + json_file
-    return
-
-def json_load( file_name, path=None ):
-    "loads the json string from a file and returns a json data structure"
-    if path == None:
-        json_file = os.path.abspath( os.path.join( data_dir, file_name ) )
-    else:
-        json_file = os.path.abspath( os.path.join( dir, path + file_name ) )
-
-    with open(json_file) as _file:
-        json_data = json.load(_file)
-    return json_data
-
 def updateGame(gameId, win, opponent, debug=False):
     "function to the database with thje data of a game"
 
     # load database cretentials
-    db_creds = json_load('db.json', private_dir)
+    db_creds = lib.json_load('db.json', private_dir)
     user_lvl = 1 # only SELECT, INSERT, UPDATE
 
     # load match data
-    match = json_load(str(gameId) + '_match.json')
-    members = json_load('summoners.json')
+    match = lib.json_load(str(gameId) + '_match.json')
+    members = lib.json_load('summoners.json')
 
     # Open database connection
     db = MySQLdb.connect(

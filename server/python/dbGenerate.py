@@ -3,7 +3,7 @@
 # a database structure. It then collects all maches from the team and fills up
 # created tables with data
 
-import lib
+import lib_server as lib
 
 team_filename = 'team.json'
 lib.createTables()

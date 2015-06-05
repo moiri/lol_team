@@ -17,10 +17,10 @@ def getTeamParticipantId(match, team):
 
 
 dir = os.path.dirname(__file__)
-infile = os.path.join(dir, '../data/teams_new.json')
+infile = os.path.join(dir, '../../data/teams_new.json')
 with open(infile) as data_file:
     teams = json.load(data_file)
-infile = os.path.join(dir, '../data/matchId.json')
+infile = os.path.join(dir, '../../data/matchId.json')
 with open(infile) as data_file:
     matchIds = json.load(data_file)
 
@@ -32,7 +32,7 @@ for id in teams:
     team = teams[id]
 
 for gameId in matchIds['matchIds']:
-    infile = os.path.join(dir, '../data/' + str(gameId) + '_match.json')
+    infile = os.path.join(dir, '../../data/' + str(gameId) + '_match.json')
     with open(infile) as data_file:
         match = json.load(data_file)
 
@@ -63,7 +63,7 @@ for gameId in matchIds['matchIds']:
             }
         )
 
-outfile = os.path.join(dir, '../data/test_team.json')
+outfile = os.path.join(dir, '../../data/test_team.json')
 with open(outfile, 'w') as data_file:
     json.dump(team, data_file)
 
