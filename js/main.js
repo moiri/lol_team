@@ -1,9 +1,5 @@
 $(document).ready(function() {
     var data = {};
-    data.summonerId = null;
-    data.opposingTeam = '0';
-    data.role = null;
-    data.minCount = 0;
     $.getJSON('data/team.json', function(team) {
         $.getJSON('data/summoners.json', function(summoners) {
             var cb;
@@ -23,8 +19,8 @@ $(document).ready(function() {
             );
             $('[id|="summonerId"]').click(function() {
                 var id, summonerName;
-                data.opposingTeam = '0';
-                data.summonerId = null;
+                delete data.opposingTeam;
+                delete data.summonerId;
 
                 id = $(this).attr('id').split('-');
                 if (id[1] === 'opposingTeam') {
@@ -46,7 +42,7 @@ $(document).ready(function() {
             });
             $('[id|="role"]').click(function() {
                 var cb, me = $(this);
-                data.role = null;
+                delete data.role;
                 id = $(this).attr('id').split('-');
                 cb = function () {hide_filter(id[0]);}
                 if (id[1] != 'all') {
@@ -57,7 +53,7 @@ $(document).ready(function() {
             });
             $('[id|="minCount"]').click(function() {
                 var me = $(this), cb;
-                data.minCount = null;
+                delete data.minCount;
                 id = me.attr('id').split('-');
                 cb = function () {hide_filter(id[0]);}
                 if (id[1] != 'all') {
@@ -70,12 +66,20 @@ $(document).ready(function() {
                 var summonerName, cb;
                 id = $(this).parent().attr('id').split('-');
                 cb = function () { hide_filter(id[1]); }
+                delete data[id[1]];
                 if (id[1] === "summonerId") {
                     summonerName = team.name;
                     cb = function () {disable_filter(id[1]);}
-                    data.opposingTeam = null;
+                    delete data.opposingTeam;
                 }
-                data[id[1]] = null;
+                if (id[1] === "clear") {
+                    data = {};
+                    summonerName = team.name;
+                    cb = function () { 
+                        $('[id|="filter"]:not(#filter-summonerId)').hide();
+                        disable_filter('summonerId');
+                    }
+                }
                 getWinrate(data, summonerName, cb);
             });
             getWinrate(data, team.name, function () {disable_filter('summonerId');});
@@ -124,12 +128,14 @@ function getWinrate(data, summonerName, cb) {
             });
         }
         if (cb != undefined) cb();
+        if ($.isEmptyObject(data)) hide_filter('clear');
     });
 }
 
 function show_filter (id, data) {
     $('#filter-' + id + ' > button > span:first').html(data)
     $('#filter-' + id).show();
+    $('#filter-clear').show();
 }
 
 function hide_filter (id) {
@@ -139,6 +145,7 @@ function hide_filter (id) {
 function enable_filter (id) {
     $('#filter-' + id + ' > button').removeAttr('disabled');
     $('#filter-summonerId > button').children('span:last').show();
+    $('#filter-clear').show();
 }
 function disable_filter (id) {
     $('#filter-' + id + ' > button').attr('disabled', 'disabled');
