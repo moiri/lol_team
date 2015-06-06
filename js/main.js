@@ -116,10 +116,10 @@ function getWinrate(data, summonerName, cb) {
 
 
 function enable_sum_filter () {
-    $('#filter-summonerId button').removeAttr('disabled');
-    $('#filter-summonerId button').children('span:last').show();
+    $('#filter-summonerId > button').removeAttr('disabled');
+    $('#filter-summonerId > button').children('span:last').show();
 }
 function disable_sum_filter () {
-    $('#filter-summonerId button').attr('disabled', 'disabled');
-    $('#filter-summonerId button').children('span:last').hide();
+    $('#filter-summonerId > button').attr('disabled', 'disabled');
+    $('#filter-summonerId > button').children('span:last').hide();
 }

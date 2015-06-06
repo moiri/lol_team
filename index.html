@@ -24,12 +24,23 @@
     <!-- <div class="navbar"></div> -->
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-1"></div>
-            <div class="col-lg-11">
+            <div class="col-lg-11 col-lg-offset-1">
                 <h2><span id="title-name">Teamname</span> <small><span id="title-wins">0
                         </span>:<span id="title-losses">0
                         </span> (<span id="title-winRate">0.00
-                        </span>)</small></h2>
+                        </span>)</small>
+                <div class="pull-right"><span id="filter-summonerId">
+                    <button type="button" class="btn btn-primary btn-xs">
+                        <span>Summoner</span>
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </button>
+                </span>
+                <span id="filter-role" style="display:none">
+                    <button type="button" class="btn btn-primary btn-xs">
+                        <span>Role</span>
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </button>
+                </span></div></h2>
             </div>
         </div>
         <div class="row">
@@ -57,20 +68,6 @@
                         <li><a id="role-adc" href="#">ADC</a></li>
                         <li><a id="role-support" href="#">Support</a></li>
                     </ul>
-                </div>
-                <div class="well well-sm">
-                    <div id="filter-summonerId" class="filter">
-                        <button type="button" class="btn btn-primary btn-xs">
-                            <span>Summoner</span>
-                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                        </button>
-                    </div>
-                    <div id="filter-role" class="filter" style="display:none">
-                        <button type="button" class="btn btn-primary btn-xs">
-                            <span>Role</span>
-                            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-                        </button>
-                    </div>
                 </div>
             </div>
             <div class="col-lg-11 content"></div>
