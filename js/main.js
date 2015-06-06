@@ -59,6 +59,7 @@ $(document).ready(function() {
                 if (id[1] === "summonerId") {
                     summonerName = team.name;
                     cb = disable_sum_filter;
+                    data.opposingTeam = null;
                 }
                 else cb = function () { me.parent().hide(); }
                 data[id[1]] = null;
