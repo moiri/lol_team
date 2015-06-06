@@ -60,6 +60,9 @@ def stats_champions(req):
     role = None
     if 'role' in user_data:
         role = user_data['role'].value
+    minCount = None
+    if 'minCount' in user_data:
+        minCount = int(user_data['minCount'].value)
     team = lib.json_load('team.json')
     championStats = lib.json_load('champion.json')
 
@@ -109,6 +112,8 @@ def stats_champions(req):
                 + query_where_clause + ';'
         cursor.execute(query)
         rows = cursor.fetchall()
+        if len(rows) < minCount:
+            continue;
         winCount = 0
         kill_sum = 0
         death_sum = 0

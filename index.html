@@ -40,6 +40,12 @@
                         <span>Role</span>
                         <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                     </button>
+                </span>
+                <span id="filter-minCount" style="display:none">
+                    <button type="button" class="btn btn-primary btn-xs">
+                        <span>MinCount</span>
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                    </button>
                 </span></div></h2>
             </div>
         </div>
@@ -54,12 +60,12 @@
                     <ul class="dropdown-menu summoners" role="menu"></ul>
                 </div>
                 <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-default dropdown-toggle" 
+                    <button type="button" class="btn btn-default dropdown-toggle"
                         data-toggle="dropdown" aria-expanded="false">
                         Role
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu role" role="menu">
+                    <ul class="dropdown-menu" role="menu">
                         <li><a id="role-all" href="#">All</a></li>
                         <li role="presentation" class="divider"></li>
                         <li><a id="role-top" href="#">Top</a></li>
@@ -67,6 +73,21 @@
                         <li><a id="role-mid" href="#">Mid</a></li>
                         <li><a id="role-adc" href="#">ADC</a></li>
                         <li><a id="role-support" href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default dropdown-toggle"
+                        data-toggle="dropdown" aria-expanded="false">
+                        Min # Games
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a id="minCount-all" href="#">All</a></li>
+                        <li role="presentation" class="divider"></li>
+                        <li><a id="minCount-5" href="#">5</a></li>
+                        <li><a id="minCount-10" href="#">10</a></li>
+                        <li><a id="minCount-50" href="#">50</a></li>
+                        <li><a id="minCount-100" href="#">100</a></li>
                     </ul>
                 </div>
             </div>
