@@ -5,6 +5,7 @@ $(document).ready(function() {
     data.role = null;
     $.getJSON('data/team.json', function(team) {
         $.getJSON('data/summoners.json', function(summoners) {
+            var cb;
             $('.summoners').append(
                 '<li><a id="summoner-all" href="#">' + team.name + '</a></li>'
                 + '<li role="presentation" class="divider"></li>'
@@ -28,34 +29,57 @@ $(document).ready(function() {
                 if (id[1] === 'opposingTeam') {
                     data.opposingTeam = '1'
                     summonerName = "Opponents";
+                    cb = enable_sum_filter;
                 }
-                else if (id[1] === 'all')
+                else if (id[1] === 'all') {
                     summonerName = team.name;
+                    cb = disable_sum_filter;
+                }
                 else {
                     data.summonerId = id[1];
                     summonerName = summoners[id[1]]
+                    cb = enable_sum_filter;
                 }
 
-                getWinrate(data, summonerName);
+                getWinrate(data, summonerName, cb);
             });
             $('[id|="role"]').click(function() {
+                var me = $(this);
                 data.role = null;
-                id = $(this).attr('id').split('-');
+                id = me.attr('id').split('-');
                 data.role = id[1];
-                getWinrate(data);
+                getWinrate(data, undefined, function () {
+                    $('#filter-role button span:first').html(me.html())
+                    $('#filter-role').show();
+                });
             });
-            getWinrate(data, team.name);
+            $('[id|="filter"] button:not(disabled)').click(function() {
+                var summonerName, cb, me = $(this);
+                id = me.parent().attr('id').split('-');
+                if (id[1] === "summonerId") {
+                    summonerName = team.name;
+                    cb = disable_sum_filter;
+                }
+                else cb = function () { me.parent().hide(); }
+                data[id[1]] = null;
+                getWinrate(data, summonerName, cb);
+            });
+            getWinrate(data, team.name, disable_sum_filter);
         });
     });
 });
 
-function getWinrate(data, summonerName) {
+function getWinrate(data, summonerName, cb) {
     var url;
     url = 'python/stats/stats_champions';
     $.getJSON(url, data, function(json) {
         var table_title;
 
-        if (summonerName != undefined) $('#title-name').html(summonerName);
+        if (summonerName != undefined) {
+            $('#title-name').html(summonerName);
+            $('#filter-summonerId button span:first').html(summonerName);
+            $('#filter-summonerId').show();
+        }
         $('#title-wins').html(json.summoner.wins);
         $('#title-losses').html(json.summoner.losses);
         $('#title-winRate').html(json.summoner.winRate);
@@ -79,9 +103,22 @@ function getWinrate(data, summonerName) {
             table += '</tr>';
             $('table#champs > tbody').append(table);
         });
-        $("table#champs").tablesorter({
-            // sort on the first column and third column, order asc 
-            sortList: [[1,1]]
-        });
+        if (json.champions.length) {
+            $("table#champs").tablesorter({
+                // sort on the first column and third column, order asc 
+                sortList: [[1,1]]
+            });
+        }
+        if (cb != undefined) cb();
     });
+}
+
+
+function enable_sum_filter () {
+    $('#filter-summonerId button').removeAttr('disabled');
+    $('#filter-summonerId button').children('span:last').show();
+}
+function disable_sum_filter () {
+    $('#filter-summonerId button').attr('disabled', 'disabled');
+    $('#filter-summonerId button').children('span:last').hide();
 }

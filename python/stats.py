@@ -154,8 +154,11 @@ def stats_champions(req):
     if summonerId == None:
         json_data['summoner']['wins'] /= 5
         json_data['summoner']['losses'] /= 5
-    json_data['summoner']['winRate'] = round(float(winCount_summoners)\
-            / float(gameCount_summoners), 2)
+
+    json_data['summoner']['winRate'] = 0.00
+    if gameCount_summoners > 0:
+        json_data['summoner']['winRate'] = round(float(winCount_summoners)\
+                / float(gameCount_summoners), 2)
     # disconnect from server
     db.close()
     # json_data['champions'].sort(key=lambda champ: champ['stats']['gameCount'], reverse=True)
