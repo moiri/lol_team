@@ -4,3 +4,4 @@ team_temp.json
 plugin-src
 *.swp
 *.pyc
+apache.conf
