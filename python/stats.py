@@ -104,9 +104,12 @@ def stats_champions(req):
             "Deaths", "Assists", "KDA", "Gold", "CS"]
     winCount_summoners = 0
     gameCount_summoners = 0
+    winCount_opponent = 0
+    gameCount_oponent = 0
+    matchIds = []
     for champId in champIds:
         query = "SELECT winner, kills, deaths, assists, goldEarned," \
-                + " minionsKilled, neutralMinionsKilled" \
+                + " minionsKilled, neutralMinionsKilled, matchId" \
                 + " FROM champ_summoner_game" \
                 + " WHERE championId='" + str(champId[0]) + "'" \
                 + query_where_clause + ';'
@@ -127,6 +130,10 @@ def stats_champions(req):
             assist_sum += row[3]
             gold_sum += row[4]
             cs_sum += row[5] + row[6]
+            if row[7] not in matchIds:
+                matchIds.append(row[7])
+                winCount_opponent += row[0]
+                gameCount_oponent += 1
 
         winCount_summoners += winCount
         gameCount_summoners += len(rows)
@@ -157,8 +164,8 @@ def stats_champions(req):
     json_data['summoner']['wins'] = winCount_summoners
     json_data['summoner']['losses'] = gameCount_summoners - winCount_summoners
     if summonerId == None:
-        json_data['summoner']['wins'] /= 5
-        json_data['summoner']['losses'] /= 5
+        json_data['summoner']['wins'] = winCount_opponent
+        json_data['summoner']['losses'] = gameCount_oponent - winCount_opponent
 
     json_data['summoner']['winRate'] = 0.00
     if gameCount_summoners > 0:
