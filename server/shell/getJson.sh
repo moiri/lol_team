@@ -22,12 +22,18 @@ all (*) parameters are ignored. If API usage is not specified with parameters
 or an explicit url, status information are returned.
 
 Options:
--h, --help            display this usage message and exit
--t, --team [ID]       get team info by ID (ID=0 selects the teamId from the
-                      file ../private/team) (*)
--m, --match [ID]      get match info by ID (*)
--l, --timeline        add timeline to JSON object (*)
--o, --output [FILE]   write output to file
+-h, --help                 display this usage message and exit
+-a, --match-history [ID]   get match history by summoner ID
+-r, --ranked-team          only get match history with ranked team games
+-b, --begin-index [IDX]    get the match history (15 elements) beginning with
+                           index [IDX]
+-t, --team [ID]            get team info by ID (ID=0 selects the teamId from
+                           the file ../private/team) (*)
+-m, --match [ID]           get match info by ID (*)
+-l, --timeline             add timeline to JSON object (*)
+-s, --team-summoner [ID]   get teams by summoner ID
+-p, --summoner [ID]        get summoner infos by comma seperated IDs
+-o, --output [FILE]        write output to file
 
 EOF
 
@@ -52,6 +58,27 @@ while [ $# -gt 0 ] ; do
         -h|--help)
             usage
             ;;
+        -a|--match-history)
+            url_api="v2.2/matchhistory/"
+            id=$2
+            if [ -z "$id" ] ; then
+                usage "ID required"
+            fi
+            output_def=${id}_history
+            shift
+            ;;
+        -b|--begin-index)
+            if [ -z "$2" ] ; then
+                usage "IDX required"
+            fi
+            option="${option}beginIndex=${2}&"
+            output_suffix=${output_suffix}_${2}
+            shift
+            ;;
+        -r|--ranked-team)
+            option="${option}rankedQueues=RANKED_TEAM_5x5&"
+            output_suffix="${output_suffix}_team"
+            ;;
         -t|--team)
             url_api="v2.4/team/"
             id=$2
@@ -72,8 +99,26 @@ while [ $# -gt 0 ] ; do
             shift
             ;;
         -l|--timeline)
-            option="includeTimeline=true&"
-            output_suffix="_timeline"
+            option="${option}includeTimeline=true&"
+            output_suffix="${output_suffix}_timeline"
+            ;;
+        -s|--team-summoner)
+            url_api="v2.4/team/by-summoner/"
+            id=$2
+            if [ -z "$id" ] ; then
+                usage "ID required"
+            fi
+            output_def=${id}_team
+            shift
+            ;;
+        -p|--summoner)
+            url_api="v1.4/summoner/"
+            id=$2
+            if [ -z "$id" ] ; then
+                usage "ID required"
+            fi
+            output_def="summoners"
+            shift
             ;;
         -o|--output)
             output="$2"
@@ -104,7 +149,7 @@ if [ -z "$output" ]; then
     output=${SCRIPTPATH}/${output_path}${output_def}${output_suffix}.json
 fi
 
-echo "fetch data from API: "${url_api}${id}
+echo "fetch data from API: ${url_api}${id}?${option}key=..."
 json=$(curl --request GET $url)
 output=$(realpath $output)
 echo "saved in file "$output"\n"

@@ -7,10 +7,10 @@ $(document).ready(function() {
                 '<li><a id="summonerId-all" href="#">' + team.name + '</a></li>'
                 + '<li role="presentation" class="divider"></li>'
             );
-            $.each(team.roster.memberList, function (idx, member) {
+            $.each(summoners, function (id, summoner) {
                 $('.summoners').append(
-                    '<li><a id="summonerId-' + member.playerId
-                    + '" href="#">' + summoners[member.playerId] + '</a></li>'
+                    '<li><a id="summonerId-' + id
+                    + '" href="#">' + summoner.name + '</a></li>'
                 );
             });
             $('.summoners').append(
@@ -34,7 +34,7 @@ $(document).ready(function() {
                 }
                 else {
                     data.summonerId = id[1];
-                    summonerName = summoners[id[1]]
+                    summonerName = summoners[id[1]].name;
                     cb = function () {enable_filter(id[0]);}
                 }
 

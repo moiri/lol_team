@@ -13,6 +13,12 @@ sys.path.insert(0, os.path.join(dir, '../../python'))
 import lib
 json_load = lib.json_load
 json_dump = lib.json_dump
+private_dir = lib.private_dir
+data_dir = lib.data_dir
+myTeamId = lib.myTeamId
+myTeamFileName = lib.myTeamFileName
+summonersFileName = lib.summonersFileName
+championsFileName = lib.championsFileName
 
 def createTables(debug=False):
     "function to creat db structure"
@@ -81,6 +87,145 @@ def fetch_api( args ):
     subprocess.call([shellfile] + args)
     time.sleep(1)
     return
+
+def getTeam(myTeamId):
+    "get the team json file from the RIOT API"
+    # fetch team json file
+    fetch_api(['-t', myTeamId, '-o', lib.data_dir + myTeamId + "_team.json"])
+
+    # extract team from json file
+    myTeams = lib.json_load(myTeamId + "_team.json", lib.data_dir)
+    if len(myTeams) > 1:
+        print "Only one team is expected but " + str(len(teams_new)) + \
+            " are stored in the file"
+        sys.exit()
+    for id in myTeams:
+        myTeam = myTeams[id]
+
+    return myTeam
+
+def getTeamRoster(myTeam):
+    "extract the roster IDs from the team and get the corresponding summoner names"
+    idList = ""
+    joinDates = {}
+    for summoner in myTeam['roster']['memberList']:
+        idList += str(summoner['playerId']) + ','
+        joinDates[summoner['playerId']] = summoner['joinDate']
+    idList[:-1]
+    fetch_api(['-p', idList])
+
+    roster = lib.json_load('summoners.json', lib.data_dir)
+
+    # add team join dates
+    for summonerId in roster:
+        roster[summonerId]['joinDate'] = joinDates[int(summonerId)]
+    lib.json_dump('summoners.json', roster, lib.data_dir)
+
+    return roster
+
+def getMatchDetails(matchId, opposingTeamName, teamId, roster = None):
+    "return a dict with match details"
+    fetch_api(['-m', str(matchId)])
+    match = lib.json_load(str(matchId) + "_match.json", lib.data_dir)
+
+    stats = {
+        'kills': 0,
+        'deaths': 0,
+        'assists': 0,
+        'oAssists': 0,
+        'firstBlood': None,
+        'firstTower': None,
+        'firstInhibitor': None,
+        'firstBaron': None,
+        'firstDragon': None,
+        'towerKills': None,
+        'inhibitorKills': None,
+        'baronKills': None,
+        'dragonKills': None,
+        'oTowerKills': None,
+        'oInhibitorKills': None,
+        'oBaronKills': None,
+        'oDragonKills': None
+    }
+    myTeamParticipantIds = [];
+    if 'participants' in match:
+        for guy in match['participants']:
+            if (guy['teamId'] == teamId) and ('stats' in guy):
+                stats['kills'] += 0 if 'kills' not in guy['stats'] else guy['stats']['kills']
+                stats['deaths'] += 0 if 'deaths' not in guy['stats'] else guy['stats']['deaths']
+                stats['assists'] += 0 if 'assists' not in guy['stats'] else guy['stats']['assists']
+                myTeamParticipantIds.append(guy['participantId'])
+            else:
+                stats['oAssists'] += 0 if 'assists' not in guy['stats'] else guy['stats']['assists']
+
+    if 'teams' in match:
+        for team in match['teams']:
+            if team['teamId'] == teamId:
+                stats['win'] = team['winner']
+                stats['firstBlood'] = None if 'firstBlood' not in team else team['firstBlood']
+                stats['firstTower'] = None if 'firstTower' not in team else team['firstTower']
+                stats['firstInhibitor'] = None if 'firstInhibitor' not in team else team['firstInhibitor']
+                stats['firstBaron'] = None if 'firstBaron' not in team else team['firstBaron']
+                stats['firstDragon'] = None if 'firstDragon' not in team else team['firstDragon']
+                stats['towerKills'] = None if 'towerKills' not in team else team['towerKills']
+                stats['inhibitorKills'] = None if 'towerKills' not in team else team['inhibitorKills']
+                stats['baronKills'] = None if 'baronKills' not in team else team['baronKills']
+                stats['dragonKills'] = None if 'dragonKills' not in team else team['dragonKills']
+            else:
+                stats['oTowerKills'] = None if 'towerKills' not in team else team['towerKills']
+                stats['oInhibitorKills'] = None if 'towerKills' not in team else team['inhibitorKills']
+                stats['oBaronKills'] = None if 'baronKills' not in team else team['baronKills']
+                stats['oDragonKills'] = None if 'dragonKills' not in team else team['dragonKills']
+
+    # check whether the team consists of 5 members of myTeam to narrow down the
+    # possibility of getting a match of a different team  where the summoner is
+    # also in the roster of myTeam
+    valid = True
+    memberCount = 0
+    if roster:
+        for guy in match['participantIdentities']:
+            if guy['participantId'] in myTeamParticipantIds:
+                if str(guy['player']['summonerId']) in roster:
+                    memberCount += 1
+        if memberCount != 5:
+            # all 5 players need to be part of myTeam
+            valid = False
+
+    matchDetails = {
+        'matchId': matchId,
+        'matchCreation': match['matchCreation'],
+        'matchDuration': match['matchDuration'],
+        'win': stats['win'],
+        'kills': stats['kills'],
+        'deaths': stats['deaths'],
+        'assists': stats['assists'],
+        'firstBlood': stats['firstBlood'],
+        'firstTower': stats['firstTower'],
+        'firstInhibitor': stats['firstInhibitor'],
+        'firstBaron': stats['firstBaron'],
+        'firstDragon': stats['firstDragon'],
+        'towerKills': stats['towerKills'],
+        'inhibitorKills': stats['inhibitorKills'],
+        'baronKills': stats['baronKills'],
+        'dragonKills': stats['dragonKills'],
+        'oName': opposingTeamName,
+        'oAssists': stats['oAssists'],
+        'oTowerKills': stats['oTowerKills'],
+        'oInhibitorKills': stats['oInhibitorKills'],
+        'oBaronKills': stats['oBaronKills'],
+        'oDragonKills': stats['oDragonKills'],
+        'mapId': match['mapId'],
+        'season': match['season'],
+        'region': match['region'],
+        'platformId': match['platformId'],
+        'matchVersion': None if 'matchVersion' not in match else match['matchVersion'],
+        'queueType': match['queueType'],
+        'matchMode': match['matchMode'],
+        'matchType': match['matchType'],
+        'valid': valid
+    }
+
+    return matchDetails
 
 def genQueryAlterTable(table_name, json_data, primary=None):
     "function to add columns to a table"

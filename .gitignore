@@ -5,3 +5,4 @@ plugin-src
 *.swp
 *.pyc
 apache.conf
+data/*match*

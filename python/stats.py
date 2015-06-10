@@ -6,8 +6,8 @@ import mod_python #read GET data
 
 def winrate_summoners():
     # lead team and summoner information
-    team = lib.json_load('team.json')
-    summoners = lib.json_load('summoners.json')
+    team = lib.json_load(lib.myTeamFileName)
+    summoners = lib.json_load(lib.summonersFileName)
 
     # load database cretentials
     db_creds = lib.json_load('db.json', lib.private_dir)
@@ -63,7 +63,7 @@ def stats_champions(req):
     minCount = None
     if 'minCount' in user_data:
         minCount = int(user_data['minCount'].value)
-    team = lib.json_load('team.json')
+    team = lib.json_load(lib.myTeamFileName)
     championStats = lib.json_load('champion.json')
 
     # load database cretentials

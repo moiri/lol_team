@@ -3,28 +3,13 @@
 # fetches new match data
 import lib_server as lib
 
-team_filename = 'team.json'
-teams_new_filename = 'teams_new.json'
 matches_new = []
 
-# execute the shell script to fetch the new team match history
-lib.fetch_api(['-t', str(0)])
-
-# load new match history as json file
-teams_new = lib.json_load( teams_new_filename )
-
-# only continue if there is one team inside the file
-if len(teams_new) > 1:
-    print "Only one team is expected but " + str(len(teams_new)) + \
-        " are stored in the file"
-    sys.exit()
-
-# extract the team
-for id in teams_new:
-    team_new = teams_new[id]
+# get new team match history
+team_new = lib.getTeam( lib.myTeamId )
 
 # load old team match history
-team = lib.json_load( team_filename )
+team = lib.json_load( lib.myTeamFileName )
 
 # merge match history
 for match_new in team_new['matchHistory']:
@@ -50,7 +35,7 @@ else:
     print "nothing to update in mach history\n"
 
 # save new team data to file (including the complete match history)
-lib.json_dump( team_filename, team_new )
+lib.json_dump( lib.myTeamFileName, team_new )
 
 # fetch the new match files
 for match_new in matches_new:

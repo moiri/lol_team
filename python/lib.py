@@ -6,6 +6,10 @@ import json
 dir = os.path.dirname(__file__) # get absolute file path
 data_dir = os.path.join(dir, '../data/')
 private_dir = os.path.join(dir, '../server/private/')
+myTeamId = "TEAM-106e2ea0-959c-11e3-a2ca-782bcb497d6f"
+myTeamFileName = "team.json"
+summonersFileName = "summoners.json"
+championsFileName = "champions.json"
 
 def json_dump( file_name, json_data, path=None ):
     "dumps a json data structure to a file as a json string"
