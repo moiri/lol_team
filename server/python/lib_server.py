@@ -20,135 +20,54 @@ myTeamFileName = lib.myTeamFileName
 summonersFileName = lib.summonersFileName
 championsFileName = lib.championsFileName
 
-def createTables(debug=False):
-    "function to creat db structure"
-    # load database cretentials
-    db_creds = lib.json_load('db.json', private_dir)
-    user_lvl = 2 # all privileges
-
-    # load match data
-    match = lib.json_load('2117389806_match.json')
-
-    # Open database connection
-    db = MySQLdb.connect(
-        db_creds['host'],
-        db_creds['users'][user_lvl]['name'],
-        db_creds['users'][user_lvl]['password'],
-        db_creds['name']
-    )
-
-    # prepare a cursor object using cursor() method
-    cursor = db.cursor()
-
-    # create games table
-    query = "CREATE TABLE IF NOT EXISTS games (" + \
-            "win TINYINT(1) UNSIGNED," + \
-            "opposingTeamName VARCHAR(50));"
-    if debug: print query
-    else: cursor.execute(query)
-
-    # add columns to games table
-    query = genQueryAlterTable('games', match, 'matchId')
-    if debug: print query
-    else: cursor.execute(query)
-
-    # create champ_summoner_game table
-    query = "CREATE TABLE IF NOT EXISTS champ_summoner_game (" + \
-            "matchId INT(11) UNSIGNED, summonerId INT(11) UNSIGNED," +\
-            "opposingTeam TINYINT(1) UNSIGNED);"
-    if debug: print query
-    else: cursor.execute(query)
-
-    # add general match info columns to champ_summoner_game table
-    query = genQueryAlterTable( 'champ_summoner_game', match['participants'][0],
-            None)
-    if debug: print query
-    else: cursor.execute(query)
-
-    # add summoner stats to champ_summoner_game_table
-    query = genQueryAlterTable( 'champ_summoner_game',
-            match['participants'][0]['stats'], None)
-    if debug: print query
-    else: cursor.execute(query)
-
-    # add champion position to champ_game_table
-    query = genQueryAlterTable( 'champ_summoner_game',
-            match['participants'][0]['timeline'], None)
-    if debug: print query
-    else: cursor.execute(query)
-
-    # disconnect from server
-    db.close()
-    return
-
-def fetch_api( args ):
+def api_fetch( args ):
     "executes the shell script getJson.sh to fetch data from the lol api"
     shellfile = os.path.abspath( os.path.join( shell_dir, 'getJson.sh' ) )
     subprocess.call([shellfile] + args)
     time.sleep(1)
     return
 
-def getTeam(myTeamId):
-    "get the team json file from the RIOT API"
-    # fetch team json file
-    fetch_api(['-t', myTeamId, '-o', lib.data_dir + myTeamId + "_team.json"])
-
-    # extract team from json file
-    myTeams = lib.json_load(myTeamId + "_team.json", lib.data_dir)
-    if len(myTeams) > 1:
-        print "Only one team is expected but " + str(len(teams_new)) + \
-            " are stored in the file"
-        sys.exit()
-    for id in myTeams:
-        myTeam = myTeams[id]
-
-    return myTeam
-
-def getTeamRoster(myTeam):
-    "extract the roster IDs from the team and get the corresponding summoner names"
-    idList = ""
-    joinDates = {}
-    for summoner in myTeam['roster']['memberList']:
-        idList += str(summoner['playerId']) + ','
-        joinDates[summoner['playerId']] = summoner['joinDate']
-    idList[:-1]
-    fetch_api(['-p', idList])
-
-    roster = lib.json_load('summoners.json', lib.data_dir)
-
-    # add team join dates
-    for summonerId in roster:
-        roster[summonerId]['joinDate'] = joinDates[int(summonerId)]
-    lib.json_dump('summoners.json', roster, lib.data_dir)
-
-    return roster
-
-def getMatchDetails(matchId, opposingTeamName, teamId, roster = None):
+def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=False):
     "return a dict with match details"
-    fetch_api(['-m', str(matchId)])
+    api_fetch(['-m', str(matchId)])
     match = lib.json_load(str(matchId) + "_match.json", lib.data_dir)
 
+    if not teamId:
+        guyId = None
+        for guy in match['participantIdentities']:
+            if guy['player']['summonerId'] in roster:
+                guyId = guy['participantId']
+                break
+        for guy in match['participants']
+            if guyId == guy['participantId']:
+                teamId = guy['teamId']
+
     stats = {
-        'kills': 0,
-        'deaths': 0,
-        'assists': 0,
-        'oAssists': 0,
+        'kills': -1,
+        'deaths': -1,
+        'assists': -1,
+        'oAssists': -1,
         'firstBlood': None,
         'firstTower': None,
         'firstInhibitor': None,
         'firstBaron': None,
         'firstDragon': None,
-        'towerKills': None,
-        'inhibitorKills': None,
-        'baronKills': None,
-        'dragonKills': None,
-        'oTowerKills': None,
-        'oInhibitorKills': None,
-        'oBaronKills': None,
-        'oDragonKills': None
+        'towerKills': -1,
+        'inhibitorKills': -1,
+        'baronKills': -1,
+        'dragonKills': -1,
+        'oTowerKills': -1,
+        'oInhibitorKills': -1,
+        'oBaronKills': -1,
+        'oDragonKills': -1
     }
     myTeamParticipantIds = [];
     if 'participants' in match:
+        stats['kills'] = 0
+        stats['deaths'] = 0
+        stats['assists'] = 0
+        stats['oAssists'] = 0
+
         for guy in match['participants']:
             if (guy['teamId'] == teamId) and ('stats' in guy):
                 stats['kills'] += 0 if 'kills' not in guy['stats'] else guy['stats']['kills']
@@ -167,22 +86,22 @@ def getMatchDetails(matchId, opposingTeamName, teamId, roster = None):
                 stats['firstInhibitor'] = None if 'firstInhibitor' not in team else team['firstInhibitor']
                 stats['firstBaron'] = None if 'firstBaron' not in team else team['firstBaron']
                 stats['firstDragon'] = None if 'firstDragon' not in team else team['firstDragon']
-                stats['towerKills'] = None if 'towerKills' not in team else team['towerKills']
-                stats['inhibitorKills'] = None if 'towerKills' not in team else team['inhibitorKills']
-                stats['baronKills'] = None if 'baronKills' not in team else team['baronKills']
-                stats['dragonKills'] = None if 'dragonKills' not in team else team['dragonKills']
+                stats['towerKills'] = -1 if 'towerKills' not in team else team['towerKills']
+                stats['inhibitorKills'] = -1 if 'towerKills' not in team else team['inhibitorKills']
+                stats['baronKills'] = -1 if 'baronKills' not in team else team['baronKills']
+                stats['dragonKills'] = -1 if 'dragonKills' not in team else team['dragonKills']
             else:
-                stats['oTowerKills'] = None if 'towerKills' not in team else team['towerKills']
-                stats['oInhibitorKills'] = None if 'towerKills' not in team else team['inhibitorKills']
-                stats['oBaronKills'] = None if 'baronKills' not in team else team['baronKills']
-                stats['oDragonKills'] = None if 'dragonKills' not in team else team['dragonKills']
+                stats['oTowerKills'] = -1 if 'towerKills' not in team else team['towerKills']
+                stats['oInhibitorKills'] = -1 if 'towerKills' not in team else team['inhibitorKills']
+                stats['oBaronKills'] = -1 if 'baronKills' not in team else team['baronKills']
+                stats['oDragonKills'] = -1 if 'dragonKills' not in team else team['dragonKills']
 
     # check whether the team consists of 5 members of myTeam to narrow down the
     # possibility of getting a match of a different team  where the summoner is
     # also in the roster of myTeam
     valid = True
     memberCount = 0
-    if roster:
+    if check:
         for guy in match['participantIdentities']:
             if guy['participantId'] in myTeamParticipantIds:
                 if str(guy['player']['summonerId']) in roster:
@@ -192,9 +111,10 @@ def getMatchDetails(matchId, opposingTeamName, teamId, roster = None):
             valid = False
 
     matchDetails = {
-        'matchId': matchId,
-        'matchCreation': match['matchCreation'],
+        'matchId': int(matchId),
+        'matchCreation': match['matchCreation']/1000,
         'matchDuration': match['matchDuration'],
+        'matchTeamId' : teamId,
         'win': stats['win'],
         'kills': stats['kills'],
         'deaths': stats['deaths'],
@@ -208,7 +128,7 @@ def getMatchDetails(matchId, opposingTeamName, teamId, roster = None):
         'inhibitorKills': stats['inhibitorKills'],
         'baronKills': stats['baronKills'],
         'dragonKills': stats['dragonKills'],
-        'oName': opposingTeamName,
+        'oName': "n/a" if not opposingTeamName else opposingTeamName,
         'oAssists': stats['oAssists'],
         'oTowerKills': stats['oTowerKills'],
         'oInhibitorKills': stats['oInhibitorKills'],
@@ -227,55 +147,131 @@ def getMatchDetails(matchId, opposingTeamName, teamId, roster = None):
 
     return matchDetails
 
-def genQueryAlterTable(table_name, json_data, primary=None):
-    "function to add columns to a table"
-    query = "ALTER TABLE " + table_name
-    for key in json_data:
-        if type(json_data[key]) is int:
-            query += " ADD " + key + " INT(11) UNSIGNED"
-            if key == primary:
-                query += " PRIMARY KEY"
-            query += ","
-        elif type(json_data[key]) is str or type(json_data[key]) is unicode:
-            query += " ADD " + key + " VARCHAR(50),"
-        elif type(json_data[key]) is bool:
-            query += " ADD " + key + " TINYINT(1) UNSIGNED,"
-    query = query[:-1]
-    query += ";"
-    return query
+def api_getTeam(myTeamId):
+    "get the team json file from the RIOT API"
+    # fetch team json file
+    api_fetch(['-t', myTeamId, '-o', lib.data_dir + myTeamId + "_team.json"])
 
-def genQueryInsert(table_name, json_data):
-    "function to insert values into a table"
-    query = "INSERT INTO " + table_name + "("
-    for key in json_data:
-        if type(json_data[key]) is bool or \
-            type(json_data[key]) is int or \
-            type(json_data[key]) is str or \
-            type(json_data[key]) is unicode:
-            query += key + ","
-    query = query[:-1]
-    query += ") VALUES ("
-    for key in json_data:
-        if type(json_data[key]) is bool:
-            query += str(int(json_data[key])) + ","
-        elif type(json_data[key]) is int:
-            query += str(json_data[key]) + ","
-        elif type(json_data[key]) is str or type(json_data[key]) is unicode:
-            query += "'" + json_data[key] + "',"
-    query = query[:-1]
-    query += ");"
-    return query
+    # extract team from json file
+    myTeams = lib.json_load(myTeamId + "_team.json", lib.data_dir)
+    if len(myTeams) > 1:
+        print "Only one team is expected but " + str(len(teams_new)) + \
+            " are stored in the file"
+        sys.exit()
+    for id in myTeams:
+        myTeam = myTeams[id]
 
-def updateGame(gameId, win, opponent, debug=False):
-    "function to the database with thje data of a game"
+    return myTeam
 
+def api_getTeamMatchHistory(myTeam, roster):
+    "get the complete match history of the team. To this all summoner
+    history files are searched and filterd for team matches. To decide
+    if it is the right team, join dates are compared with match dates
+    and the match participants are compared with the team roster."
+    # iterate through summoners and collect other team data
+    idList = ""
+    for summonerId in roster:
+        idList += summonerId + ","
+    idList[:-1]
+    api_fetch(['-s', idList, '-o', lib.data_dir + 'teams_summoners.json'])
+    sTeams = lib.json_load('teams_summoners.json', lib.data_dir)
+
+    # collect match Ids from myTeam
+    opposingTeamNames = {}
+    myMatchIds = [] # all match IDs of myTeam (after all is said and done)
+    for match in myTeam['matchHistory']:
+        if match['gameId'] not in myMatchIds:
+            myMatchIds.append(match['gameId'])
+            opposingTeamNames[match['gameId']] = match['opposingTeamName']
+
+    # collect further match Ids by searching the match history of sumoners in the
+    # team roaster
+    otherMatchIds = [] # match IDS collected from other teams
+    teamIds = [lib.myTeamId]
+    for summonerId in sTeams:
+        print "collect team matches from summoner " + str(summonerId)
+        print "-------------------------------------------------\n"
+        # collect match IDs from all other teams (ids to be excluded)
+        for team in sTeams[summonerId]:
+            if (team['fullId'] not in teamIds) \
+                    and (team['lastGameDate'] > roster[summonerId]['joinDate']):
+                teamIds.append(team['fullId'])
+                for match in team['matchHistory']:
+                    if (match['date'] > roster[summonerId]['joinDate']) \
+                            and (match['gameId'] not in otherMatchIds):
+                        otherMatchIds.append(match['gameId'])
+        # get match history from summoner
+        # do it until a game is older than the join date or no game is available
+        idx = 0;
+        done = False
+        while not done:
+            api_fetch(['-a', summonerId, '-b', str(idx), '-r'])
+            history = lib.json_load(
+                    summonerId + '_history_' + str(idx) + '_team.json', lib.data_dir)
+            if 'matches' not in history:
+                done = True
+                break # next summoner
+
+            for match in history['matches']:
+                if match['matchCreation'] < roster[summonerId]['joinDate']:
+                    # match occurred before join date of summoner: exit loops
+                    done = True
+                    break
+
+                # use otherMatchIds to identify team games from other teams (this is
+                # not perfect as the team match history is very limited)
+                if (match['matchId'] not in otherMatchIds) \
+                        and (match['matchId'] not in myMatchIds):
+                    # we got a winner
+                    myMatchIds.append(match['matchId'])
+
+                    # fetch the match data
+                    opposingTeamName = None
+                    if match['matchId'] in opposingTeamNames:
+                        opposingTeamName = opposingTeamNames[match['matchId']]
+                    matchDetails = api_getMatchDetails(match['matchId'],
+                            opposingTeamName,
+                            roster,
+                            match['participants'][0]['teamId'],
+                            True)
+
+                    if matchDetails['valid']:
+                        print "add data from match " + str(match['matchId']) + " to history\n"
+                        myTeam['matchHistory'].append(matchDetails)
+                    else:
+                        print "player missmatch: not all players from match " \
+                            + str(match['matchId']) + " are part of the roaster\n"
+            idx += 15
+
+    # sort the match history
+    myTeam['matchHistory'].sort(key=lambda match: match['date'], reverse=True)
+    return myTeam['matchHistory']
+
+def api_getTeamRoster(myTeam):
+    "extract the roster IDs from the team and get the corresponding summoner names"
+    idList = ""
+    joinDates = {}
+    for summoner in myTeam['roster']['memberList']:
+        idList += str(summoner['playerId']) + ','
+        joinDates[summoner['playerId']] = summoner['joinDate']
+    idList[:-1]
+    api_fetch(['-p', idList])
+
+    roster = lib.json_load('summoners.json', lib.data_dir)
+
+    # add team join dates
+    for summonerId in roster:
+        roster[summonerId]['joinDate'] = joinDates[int(summonerId)]
+    # update file
+    lib.json_dump(lib.summonersFileName, roster, lib.data_dir)
+
+    return roster
+
+def db_createTables(match):
+    "create the tables match and stats in the DB"
     # load database cretentials
     db_creds = lib.json_load('db.json', private_dir)
-    user_lvl = 1 # only SELECT, INSERT, UPDATE
-
-    # load match data
-    match = lib.json_load(str(gameId) + '_match.json')
-    members = lib.json_load('summoners.json')
+    user_lvl = 2 # all privileges
 
     # Open database connection
     db = MySQLdb.connect(
@@ -288,32 +284,116 @@ def updateGame(gameId, win, opponent, debug=False):
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
 
-    # add columns to games table
-    match['win'] = win
-    match['opposingTeamName'] = opponent
-    match['matchCreation'] = match['matchCreation']/1000
-    query = genQueryInsert('games', match)
-    if debug: print query
-    else: cursor.execute(query)
+    # generate match table
+    query = query_createTable('match', match, 'matchId')
+    cursor.execute(query)
+    print "created table 'match' in the database\n"
 
-    for guy in match['participants']:
-        json_temp = guy.copy()
-        json_temp.update(guy['stats'])
-        if 'timeline' in guy: json_temp.update(guy['timeline'])
-        json_temp['matchId'] = gameId
-        for guyId in match['participantIdentities']:
-            if guyId['participantId'] == guy['participantId']:
-                json_temp['summonerId'] = guyId['player']['summonerId']
-                break
-        json_temp['opposingTeam'] = True
-        if str(json_temp['summonerId']) in members:
-            json_temp['opposingTeam'] = False
-        query = genQueryInsert('champ_summoner_game', json_temp)
-        if debug: print query
-        else: cursor.execute(query)
+    # generate stats table
+    j_match = lib.json_load(str(match['matchId']) + '_match.json')
+    stats = {}
+    stats['matchId'] = 0
+    stats['summonerId'] = 0
+    stats['opposingTeam'] = False
+    stats.update(j_match['participants'][0])
+    stats.update(j_match['participants'][0]['stats'])
+    stats.update(j_match['participants'][0]['timeline'])
 
-    db.commit()
-    print "saved data from match " + str(gameId) + " to database\n"
+    query = query_createTable('stats', stats)
+    cursor.execute(query)
+    print "created table 'stats' in the database\n"
+
     # disconnect from server
     db.close()
     return
+
+def db_insertMatches(matchHistory, roster):
+    "insert an arry of matches into the database"
+
+    # load database cretentials
+    db_creds = lib.json_load('db.json', private_dir)
+    user_lvl = 1 # only SELECT, INSERT, UPDATE
+
+    # Open database connection
+    db = MySQLdb.connect(
+        db_creds['host'],
+        db_creds['users'][user_lvl]['name'],
+        db_creds['users'][user_lvl]['password'],
+        db_creds['name']
+    )
+
+    # prepare a cursor object using cursor() method
+    cursor = db.cursor()
+
+    for match in matchHistory:
+        # add columns to match table
+        query = query_insertRow('match', match)
+        cursor.execute(query)
+        j_match = lib.json_load(str(match['matchId']) + '_match.json')
+
+        for guy in j_match['participants']:
+            stats = guy.copy()
+            stats['matchId'] = match['matchId']
+            stats['summonerId'] = 0
+            stats['opposingTeam'] = False
+            if 'stats' in guy: json_temp.update(guy['stats'])
+            if 'timeline' in guy: json_temp.update(guy['timeline'])
+            for guyId in j_match['participantIdentities']:
+                if guyId['participantId'] == guy['participantId']:
+                    stats['summonerId'] = guyId['player']['summonerId']
+                    break
+            stats['opposingTeam'] = True
+            if str(stats['summonerId']) in roster:
+                stats['opposingTeam'] = False
+
+            query = query_insertRow('stats', stats)
+            cursor.execute(query)
+
+        db.commit()
+        print "saved data from match " + str(match['matchId']) + " to database\n"
+
+    # disconnect from server
+    db.close()
+    return
+
+def query_createTable(tableName, cols, primary=None):
+    "generates a query string to create a table"
+    query = "CREATE TABLE IF NOT EXISTS " + tableName + " ("
+    for key in cols:
+        if type(cols[key]) is int:
+            query += key + "INT(11) UNSIGNED"
+            if key == primary:
+                query += " PRIMARY KEY"
+            else:
+                query += " NULL DEFAULT NULL"
+            query += ","
+        elif type(cols[key]) is str or type(cols[key]) is unicode:
+            query += key + " VARCHAR(50) NULL DEFAULT NULL,"
+        elif type(cols[key]) is bool or cols[key] == None:
+            query += key + " TINYINT(1) UNSIGNED NULL DEFAULT NULL,"
+
+    query = query[:-1]
+    query += ");"
+    return query
+
+def query_insertRow(tableName, row):
+    "generates a query string to insert a row into a table"
+    query = "INSERT INTO " + tableName + "("
+    for key in row:
+        if type(row[key]) is bool or \
+            type(row[key]) is int or \
+            type(row[key]) is str or \
+            type(row[key]) is unicode:
+            query += key + ","
+    query = query[:-1]
+    query += ") VALUES ("
+    for key in row:
+        if type(row[key]) is bool:
+            query += str(int(row[key])) + ","
+        elif type(row[key]) is int:
+            query += str(row[key]) + ","
+        elif type(row[key]) is str or type(row[key]) is unicode and row[key] != 'n/a':
+            query += "'" + row[key] + "',"
+    query = query[:-1]
+    query += ");"
+    return query
