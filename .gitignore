@@ -1,8 +1,9 @@
 private
-teams_new.json
-team_temp.json
 plugin-src
 *.swp
 *.pyc
 apache.conf
 data/*match*
+data/*history*
+data/teams_summoners.json
+data/TEAM*

@@ -11,7 +11,7 @@ roster = lib.api_getTeamRoster(myTeam)
 matchHistory = lib.api_getTeamMatchHistory(myTeam, roster)
 
 # create tables in the database
-db_createTables(matchHistory[0])
+lib.db_createTables(matchHistory[0])
 
 # insert match history and match details into the db
-db_insertMatches(matchHistory, roster)
+lib.db_insertMatches(matchHistory, roster)

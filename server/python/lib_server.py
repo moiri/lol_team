@@ -29,7 +29,10 @@ def api_fetch( args ):
 
 def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=False):
     "return a dict with match details"
-    api_fetch(['-m', str(matchId)])
+
+    # fetch match data if the file is not yet available
+    if not os.path.isfile(lib.data_dir + str(matchId) + '_match.json'):
+        api_fetch(['-m', str(matchId)])
     match = lib.json_load(str(matchId) + "_match.json", lib.data_dir)
 
     if not teamId:
@@ -38,7 +41,7 @@ def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=Fa
             if guy['player']['summonerId'] in roster:
                 guyId = guy['participantId']
                 break
-        for guy in match['participants']
+        for guy in match['participants']:
             if guyId == guy['participantId']:
                 teamId = guy['teamId']
 
@@ -164,9 +167,9 @@ def api_getTeam(myTeamId):
     return myTeam
 
 def api_getTeamMatchHistory(myTeam, roster):
-    "get the complete match history of the team. To this all summoner
-    history files are searched and filterd for team matches. To decide
-    if it is the right team, join dates are compared with match dates
+    "get the complete match history of the team. To this all summoner \
+    history files are searched and filterd for team matches. To decide \
+    if it is the right team, join dates are compared with match dates \
     and the match participants are compared with the team roster."
     # iterate through summoners and collect other team data
     idList = ""
@@ -176,13 +179,15 @@ def api_getTeamMatchHistory(myTeam, roster):
     api_fetch(['-s', idList, '-o', lib.data_dir + 'teams_summoners.json'])
     sTeams = lib.json_load('teams_summoners.json', lib.data_dir)
 
-    # collect match Ids from myTeam
     opposingTeamNames = {}
     myMatchIds = [] # all match IDs of myTeam (after all is said and done)
+    # collect opposing team name where is is available
     for match in myTeam['matchHistory']:
-        if match['gameId'] not in myMatchIds:
-            myMatchIds.append(match['gameId'])
+        if match['gameId'] not in opposingTeamNames:
             opposingTeamNames[match['gameId']] = match['opposingTeamName']
+    del myTeam['matchHistory']
+    lib.json_dump(lib.myTeamFileName, myTeam, lib.data_dir)
+    myTeam['matchHistory'] = []
 
     # collect further match Ids by searching the match history of sumoners in the
     # team roaster
@@ -244,7 +249,7 @@ def api_getTeamMatchHistory(myTeam, roster):
             idx += 15
 
     # sort the match history
-    myTeam['matchHistory'].sort(key=lambda match: match['date'], reverse=True)
+    myTeam['matchHistory'].sort(key=lambda match: match['matchCreation'], reverse=True)
     return myTeam['matchHistory']
 
 def api_getTeamRoster(myTeam):
@@ -267,7 +272,7 @@ def api_getTeamRoster(myTeam):
 
     return roster
 
-def db_createTables(match):
+def db_createTables(match, debug=False):
     "create the tables match and stats in the DB"
     # load database cretentials
     db_creds = lib.json_load('db.json', private_dir)
@@ -286,7 +291,8 @@ def db_createTables(match):
 
     # generate match table
     query = query_createTable('match', match, 'matchId')
-    cursor.execute(query)
+    if (debug): print query
+    else: cursor.execute(query)
     print "created table 'match' in the database\n"
 
     # generate stats table
@@ -300,14 +306,15 @@ def db_createTables(match):
     stats.update(j_match['participants'][0]['timeline'])
 
     query = query_createTable('stats', stats)
-    cursor.execute(query)
+    if (debug): print query
+    else: cursor.execute(query)
     print "created table 'stats' in the database\n"
 
     # disconnect from server
     db.close()
     return
 
-def db_insertMatches(matchHistory, roster):
+def db_insertMatches(matchHistory, roster, debug=False):
     "insert an arry of matches into the database"
 
     # load database cretentials
@@ -328,7 +335,8 @@ def db_insertMatches(matchHistory, roster):
     for match in matchHistory:
         # add columns to match table
         query = query_insertRow('match', match)
-        cursor.execute(query)
+        if (debug): print query
+        else: cursor.execute(query)
         j_match = lib.json_load(str(match['matchId']) + '_match.json')
 
         for guy in j_match['participants']:
@@ -336,8 +344,8 @@ def db_insertMatches(matchHistory, roster):
             stats['matchId'] = match['matchId']
             stats['summonerId'] = 0
             stats['opposingTeam'] = False
-            if 'stats' in guy: json_temp.update(guy['stats'])
-            if 'timeline' in guy: json_temp.update(guy['timeline'])
+            if 'stats' in guy: stats.update(guy['stats'])
+            if 'timeline' in guy: stats.update(guy['timeline'])
             for guyId in j_match['participantIdentities']:
                 if guyId['participantId'] == guy['participantId']:
                     stats['summonerId'] = guyId['player']['summonerId']
@@ -347,7 +355,8 @@ def db_insertMatches(matchHistory, roster):
                 stats['opposingTeam'] = False
 
             query = query_insertRow('stats', stats)
-            cursor.execute(query)
+            if (debug): print query
+            else: cursor.execute(query)
 
         db.commit()
         print "saved data from match " + str(match['matchId']) + " to database\n"
@@ -358,19 +367,19 @@ def db_insertMatches(matchHistory, roster):
 
 def query_createTable(tableName, cols, primary=None):
     "generates a query string to create a table"
-    query = "CREATE TABLE IF NOT EXISTS " + tableName + " ("
+    query = "CREATE TABLE IF NOT EXISTS `" + tableName + "` ("
     for key in cols:
         if type(cols[key]) is int:
-            query += key + "INT(11) UNSIGNED"
+            query += "`" + key + "` INT(11) UNSIGNED"
             if key == primary:
                 query += " PRIMARY KEY"
             else:
-                query += " NULL DEFAULT NULL"
+                query += " DEFAULT NULL"
             query += ","
         elif type(cols[key]) is str or type(cols[key]) is unicode:
-            query += key + " VARCHAR(50) NULL DEFAULT NULL,"
+            query += "`" + key + "` VARCHAR(50) DEFAULT NULL,"
         elif type(cols[key]) is bool or cols[key] == None:
-            query += key + " TINYINT(1) UNSIGNED NULL DEFAULT NULL,"
+            query += "`" + key + "` TINYINT(1) UNSIGNED DEFAULT NULL,"
 
     query = query[:-1]
     query += ");"
@@ -378,19 +387,18 @@ def query_createTable(tableName, cols, primary=None):
 
 def query_insertRow(tableName, row):
     "generates a query string to insert a row into a table"
-    query = "INSERT INTO " + tableName + "("
+    query = "INSERT INTO `" + tableName + "` ("
     for key in row:
-        if type(row[key]) is bool or \
-            type(row[key]) is int or \
-            type(row[key]) is str or \
-            type(row[key]) is unicode:
+        if type(row[key]) is bool \
+            or (type(row[key]) is int and not row[key] < 0) \
+            or (type(row[key]) is str or type(row[key]) is unicode and row[key] != 'n/a'):
             query += key + ","
     query = query[:-1]
     query += ") VALUES ("
     for key in row:
         if type(row[key]) is bool:
             query += str(int(row[key])) + ","
-        elif type(row[key]) is int:
+        elif type(row[key]) is int and not row[key] < 0:
             query += str(row[key]) + ","
         elif type(row[key]) is str or type(row[key]) is unicode and row[key] != 'n/a':
             query += "'" + row[key] + "',"

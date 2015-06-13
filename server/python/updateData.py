@@ -22,7 +22,7 @@ for match in team_new['matchHistory']:
     matches.append(matchDetails)
 
 # insert new matches into the DB
-db_insertMatches(matches, roster)
+lib.db_insertMatches(matches, roster)
 
 # update team json file
 del team_new['matchHistory']

@@ -26,7 +26,7 @@ def winrate_summoners():
     json_data = {}
     json_data['members'] = []
     for member in team['roster']['memberList']:
-        query = "SELECT winner FROM champ_summoner_game WHERE summonerId='" + \
+        query = "SELECT winner FROM stats WHERE summonerId='" + \
                 str(member['playerId']) + "';"
         cursor.execute(query)
 
@@ -93,7 +93,7 @@ def stats_champions(req):
         query_where_clause += " AND role='DUO_CARRY'"
     elif role == 'support':
         query_where_clause += " AND role='DUO_SUPPORT'"
-    query = "SELECT DISTINCT championId FROM champ_summoner_game WHERE 1"
+    query = "SELECT DISTINCT championId FROM stats WHERE 1"
     query += query_where_clause + ';'
     cursor.execute(query)
     champIds = cursor.fetchall()
@@ -110,7 +110,7 @@ def stats_champions(req):
     for champId in champIds:
         query = "SELECT winner, kills, deaths, assists, goldEarned," \
                 + " minionsKilled, neutralMinionsKilled, matchId" \
-                + " FROM champ_summoner_game" \
+                + " FROM stats" \
                 + " WHERE championId='" + str(champId[0]) + "'" \
                 + query_where_clause + ';'
         cursor.execute(query)
