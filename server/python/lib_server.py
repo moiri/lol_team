@@ -24,7 +24,7 @@ def api_fetch( args ):
     "executes the shell script getJson.sh to fetch data from the lol api"
     shellfile = os.path.abspath( os.path.join( shell_dir, 'getJson.sh' ) )
     subprocess.call([shellfile] + args)
-    time.sleep(1)
+    time.sleep(lib.waitingTime)
     return
 
 def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=False):

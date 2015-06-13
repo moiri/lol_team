@@ -10,6 +10,7 @@ myTeamId = "TEAM-106e2ea0-959c-11e3-a2ca-782bcb497d6f"
 myTeamFileName = "team.json"
 summonersFileName = "summoners.json"
 championsFileName = "champions.json"
+waitingTime = 1 # seconds
 
 def json_dump( file_name, json_data, path=None ):
     "dumps a json data structure to a file as a json string"
