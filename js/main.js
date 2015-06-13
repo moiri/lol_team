@@ -1,5 +1,6 @@
 $(document).ready(function() {
     var data = {};
+    data.season = "SEASON2015";
     $.getJSON('data/team.json', function(team) {
         $.getJSON('data/summoners.json', function(summoners) {
             var cb;
@@ -59,6 +60,17 @@ $(document).ready(function() {
                 if (id[1] != 'all') {
                     data.minCount = id[1];
                     cb = function () {show_filter(id[0], 'Min ' + me.html() + ' Games');}
+                }
+                getWinrate(data, undefined, cb);
+            });
+            $('[id|="season"]').click(function() {
+                var cb, me = $(this);
+                delete data.season;
+                id = $(this).attr('id').split('-');
+                cb = function () {hide_filter(id[0]);}
+                if (id[1] != 'all') {
+                    data.season = id[1];
+                    cb = function () {show_filter(id[0], me.html());}
                 }
                 getWinrate(data, undefined, cb);
             });

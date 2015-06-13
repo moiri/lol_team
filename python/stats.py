@@ -48,9 +48,11 @@ def winrate_summoners():
     db.close()
     return json.dumps(json_data)
 
-def stats_champions(req):
+def stats_champions(req, debug=False):
     # load team information
-    user_data = mod_python.util.FieldStorage(req)
+    user_data = {}
+    if not debug:
+        user_data = mod_python.util.FieldStorage(req)
     summonerId = None
     if 'summonerId' in user_data:
         summonerId = user_data['summonerId'].value
@@ -63,6 +65,9 @@ def stats_champions(req):
     minCount = None
     if 'minCount' in user_data:
         minCount = int(user_data['minCount'].value)
+    season = None
+    if 'season' in user_data:
+        season = user_data['season'].value
     team = lib.json_load(lib.myTeamFileName)
     championStats = lib.json_load('champion.json')
 
@@ -80,7 +85,7 @@ def stats_champions(req):
     # prepare a cursor object using cursor() method
     cursor = db.cursor()
 
-    query_where_clause = " AND opposingTeam='" + opposingTeam + "'"
+    query_where_clause = " WHERE opposingTeam='" + opposingTeam + "'"
     if summonerId:
         query_where_clause += " AND summonerId='" + summonerId + "'"
     if role == 'top':
@@ -93,9 +98,17 @@ def stats_champions(req):
         query_where_clause += " AND role='DUO_CARRY'"
     elif role == 'support':
         query_where_clause += " AND role='DUO_SUPPORT'"
-    query = "SELECT DISTINCT championId FROM stats WHERE 1"
-    query += query_where_clause + ';'
-    cursor.execute(query)
+    if season:
+        query_where_clause += " AND season='" + season + "'"
+    query_join_clause = " LEFT JOIN `match` ON stats.matchId = match.matchId"
+    query = "SELECT DISTINCT stats.championId FROM stats"
+    query += query_join_clause
+    query += query_where_clause
+    query += ";"
+    if debug:
+        print query
+        return
+    else: cursor.execute(query)
     champIds = cursor.fetchall()
 
     json_data = {}
@@ -108,11 +121,12 @@ def stats_champions(req):
     gameCount_oponent = 0
     matchIds = []
     for champId in champIds:
-        query = "SELECT winner, kills, deaths, assists, goldEarned," \
-                + " minionsKilled, neutralMinionsKilled, matchId" \
+        query = "SELECT stats.winner, stats.kills, stats.deaths, stats.assists, stats.goldEarned," \
+                + " stats.minionsKilled, stats.neutralMinionsKilled, stats.matchId, match.season" \
                 + " FROM stats" \
-                + " WHERE championId='" + str(champId[0]) + "'" \
-                + query_where_clause + ';'
+                + query_join_clause \
+                + query_where_clause \
+                + " AND championId='" + str(champId[0]) + "';"
         cursor.execute(query)
         rows = cursor.fetchall()
         if len(rows) < minCount:
