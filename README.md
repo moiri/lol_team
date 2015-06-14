@@ -18,20 +18,29 @@ DB tables (MySQL) and saves the collected data in the tables.
 
 The python function **api_getTeamMatchHistory** collects the *myTeam* match
 history by
+
 1. collecting all teams of every summoner in the roster of *myTeam*
+
 2. collecting match IDs of all *otherTeams* from their history (only 20 games)
+
 3. collecting team matches from each summoner
 
 The game is assumed to be from *myTeam* if
+
 1. the ID does not match a game from one of the *otherTeams*
+
 2. the *myTeam* join date of the summoner we are currently investigating the
    history is lower than the game creation date
+
 3. one team of the game consist fully of players from the roster of *myTeam*
 
 This approach is not perfect because
+
 1. a summoner could be in the roster of two teams with very similar rosters
+
 2. the cross check with the *otherTeam* history can only be done over the last
    20 matches
+
 3. the roster of teams can change over time
 
 # Update Team Match History
