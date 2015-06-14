@@ -39,3 +39,10 @@ The python script **updateDate** uses the 20 item history of the team data to
 consecutively update the DB with new game information. Once the DB tables are
 created and initialised (**setup** script) the **update** script can be run
 on e.g. hourly basis by a cron job.
+
+# Display the Statistics
+The web interface is based on a [Bootstrap](http://getbootstrap.com) layout
+where functionality is provided by [jQuery](https://jquery.com) and the jQuery
+plugin [Tablesorter](http://tablesorter.com). The server script language is
+python ([mod_python](http://modpython.org)). An example apache server
+configuration file is provided in the server directory.
