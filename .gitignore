@@ -5,6 +5,5 @@ plugin-src
 apache.conf
 data/*match*
 data/*history*
-data/teams_summoners.json
-data/TEAM*
-data/team_test.json
+data/TEAM*.json
+data/team*.json
