@@ -11,6 +11,9 @@ I can see two possible reasons as to why this might be the case:
 Well, I was interested in the statistics of my team and went through the
 trouble of collecting the data. I used the scripts provided here to do so.
 
+Warning: The scripts are not fault tolerant and no exception handling is used.
+I plan to add this eventually but at the moment its just a brite force thing.
+
 # Collect Team Match History
 The python script **setup** collects the team data of *myTeam*, the summoner
 details of the roster of *myTeam*, the match history of *myTeam*, generates
