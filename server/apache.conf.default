@@ -1,0 +1,17 @@
+# lol_team default apache configuration
+# change ___path___ to the location of the project
+
+Alias /lol_team ___path___
+Alias /lauericheibe ___path___
+
+<Directory "___path___">
+    Options MultiViews
+    Require all granted
+    AddHandler mod_python .py
+    PythonHandler mod_python.publisher
+    PythonDebug On
+</Directory>
+
+<Directory "___path___/server">
+    Require all denied
+</Directory>
