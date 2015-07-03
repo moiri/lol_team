@@ -9,7 +9,7 @@ import os
 matches = []
 
 # get new team match history and update team roster
-team_new = lib.getTeam( lib.myTeamId )
+team_new = lib.api_getTeam( lib.myTeamId )
 roster = lib.api_getTeamRoster(team_new)
 
 for match in team_new['matchHistory']:

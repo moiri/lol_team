@@ -3,7 +3,4 @@ plugin-src
 *.swp
 *.pyc
 apache.conf
-data/*match*
-data/*history*
-data/TEAM*.json
-data/team*.json
+data
