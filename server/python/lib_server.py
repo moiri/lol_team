@@ -49,6 +49,8 @@ def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=Fa
         'kills': -1,
         'deaths': -1,
         'assists': -1,
+        'oKills': -1,
+        'oDeaths': -1,
         'oAssists': -1,
         'firstBlood': None,
         'firstTower': None,
@@ -69,6 +71,8 @@ def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=Fa
         stats['kills'] = 0
         stats['deaths'] = 0
         stats['assists'] = 0
+        stats['oKills'] = 0
+        stats['oDeaths'] = 0
         stats['oAssists'] = 0
 
         for guy in match['participants']:
@@ -78,6 +82,8 @@ def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=Fa
                 stats['assists'] += 0 if 'assists' not in guy['stats'] else guy['stats']['assists']
                 myTeamParticipantIds.append(guy['participantId'])
             else:
+                stats['oKills'] += 0 if 'kills' not in guy['stats'] else guy['stats']['kills']
+                stats['oDeaths'] += 0 if 'deaths' not in guy['stats'] else guy['stats']['deaths']
                 stats['oAssists'] += 0 if 'assists' not in guy['stats'] else guy['stats']['assists']
 
     if 'teams' in match:
@@ -132,6 +138,8 @@ def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=Fa
         'baronKills': stats['baronKills'],
         'dragonKills': stats['dragonKills'],
         'oName': "n/a" if not opposingTeamName else opposingTeamName,
+        'oKills': stats['oKills'],
+        'oDeaths': stats['oDeaths'],
         'oAssists': stats['oAssists'],
         'oTowerKills': stats['oTowerKills'],
         'oInhibitorKills': stats['oInhibitorKills'],
