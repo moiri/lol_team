@@ -1,14 +1,13 @@
 #!/usr/bin/python
-# fetch team data update local files if necessary also
-# fetch the new match history and update the db with the
-# new matches
+# fetch team and roster data and update the local files if necessary. Also
+# fetch the new match history and update the db with the new matches
 
 import lib_server as lib
 import os
 
 matches = []
 
-# get new team match history and update team roster
+# get new team match history and team roster, update the json files
 team_new = lib.api_getTeam( lib.myTeamId )
 roster = lib.api_getTeamRoster(team_new)
 
@@ -23,7 +22,3 @@ for match in team_new['matchHistory']:
 
 # insert new matches into the DB
 lib.db_insertMatches(matches, roster)
-
-# update team json file
-del team_new['matchHistory']
-lib.json_dump(lib.myTeamFileName, team_new, lib.data_dir)

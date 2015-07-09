@@ -160,7 +160,7 @@ def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=Fa
     return matchDetails
 
 def api_getTeam(myTeamId):
-    "get the team json file from the RIOT API"
+    "get the team information from the RIOT API and update the local file"
     # fetch team json file
     api_fetch(['-t', myTeamId, '-o', lib.data_dir + myTeamId + "_team.json"])
 
@@ -172,6 +172,11 @@ def api_getTeam(myTeamId):
         sys.exit()
     for id in myTeams:
         myTeam = myTeams[id]
+
+    # update team json file
+    team_new = myTeam.copy()
+    del team_new['matchHistory']
+    lib.json_dump(lib.myTeamFileName, team_new, lib.data_dir)
 
     return myTeam
 
@@ -262,7 +267,8 @@ def api_getTeamMatchHistory(myTeam, roster):
     return myTeam['matchHistory']
 
 def api_getTeamRoster(myTeam):
-    "extract the roster IDs from the team and get the corresponding summoner names"
+    "collect information of each summoner in the team roster and update the \
+    local file"
     idList = ""
     joinDates = {}
     for summoner in myTeam['roster']['memberList']:

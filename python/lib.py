@@ -21,7 +21,7 @@ def json_dump( file_name, json_data, path=None ):
 
     with open(json_file, 'w') as _file:
         json.dump(json_data, _file)
-    print "updated file " + json_file
+    print "updated file " + json_file + "\n"
     return
 
 def json_load( file_name, path=None ):
