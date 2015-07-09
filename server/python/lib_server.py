@@ -38,12 +38,13 @@ def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=Fa
     if not teamId:
         guyId = None
         for guy in match['participantIdentities']:
-            if guy['player']['summonerId'] in roster:
+            if str(guy['player']['summonerId']) in roster:
                 guyId = guy['participantId']
                 break
         for guy in match['participants']:
             if guyId == guy['participantId']:
                 teamId = guy['teamId']
+                break
 
     stats = {
         'kills': -1,
