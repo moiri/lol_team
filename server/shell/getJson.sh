@@ -151,6 +151,6 @@ fi
 
 echo "fetch data from API: ${url_api}${id}?${option}key=..."
 json=$(curl --request GET $url)
-output=$(realpath $output)
+output=$(readlink -m $output)
 echo "saved in file "$output"\n"
 echo $json > $output
