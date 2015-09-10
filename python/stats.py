@@ -68,6 +68,9 @@ def stats_champions(req, debug=False):
     season = None
     if 'season' in user_data:
         season = user_data['season'].value
+    queueType = None
+    if 'queueType' in user_data:
+        queueType = user_data['queueType'].value
     team = lib.json_load(lib.myTeamFileName)
     championStats = lib.json_load('champion.json')
 
@@ -100,6 +103,8 @@ def stats_champions(req, debug=False):
         query_where_clause += " AND role='DUO_SUPPORT'"
     if season:
         query_where_clause += " AND season='" + season + "'"
+    if queueType:
+        query_where_clause += " AND queueType='" + queueType + "'"
     query_join_clause = " LEFT JOIN `match` ON stats.matchId = match.matchId"
     query = "SELECT DISTINCT stats.championId FROM stats"
     query += query_join_clause

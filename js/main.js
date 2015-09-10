@@ -1,6 +1,7 @@
 $(document).ready(function() {
     var data = {};
     data.season = "SEASON2015";
+    data.queueType = "RANKED_TEAM_5x5";
     $.getJSON('data/team.json', function(team) {
         $.getJSON('data/summoners.json', function(summoners) {
             var cb;
@@ -70,6 +71,17 @@ $(document).ready(function() {
                 cb = function () {hide_filter(id[0]);}
                 if (id[1] != 'all') {
                     data.season = id[1];
+                    cb = function () {show_filter(id[0], me.html());}
+                }
+                getWinrate(data, undefined, cb);
+            });
+            $('[id|="queueType"]').click(function() {
+                var cb, me = $(this);
+                delete data.queueType;
+                id = $(this).attr('id').split('-');
+                cb = function () {hide_filter(id[0]);}
+                if (id[1] != 'all') {
+                    data.queueType = id[1];
                     cb = function () {show_filter(id[0], me.html());}
                 }
                 getWinrate(data, undefined, cb);
