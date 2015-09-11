@@ -33,7 +33,12 @@ def api_getMatchDetails(matchId, opposingTeamName, roster, teamId=None, check=Fa
     # fetch match data if the file is not yet available
     if not os.path.isfile(lib.data_dir + str(matchId) + '_match.json'):
         api_fetch(['-m', str(matchId)])
-    match = lib.json_load(str(matchId) + "_match.json", lib.data_dir)
+    try:
+        match = lib.json_load(str(matchId) + "_match.json", lib.data_dir)
+    except:
+        # delete match file
+        os.remove(lib.data_dir + str(matchId) + '_match.json')
+        raise
 
     if not teamId:
         guyId = None

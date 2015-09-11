@@ -16,9 +16,14 @@ for match in team_new['matchHistory']:
     if os.path.isfile(lib.data_dir + str(match['gameId']) + '_match.json'):
         continue
 
-    matchDetails = lib.api_getMatchDetails(match['gameId'],
-            match['opposingTeamName'], roster)
+    try:
+        matchDetails = lib.api_getMatchDetails(match['gameId'],
+                match['opposingTeamName'], roster)
+    except:
+        print "ERROR: Could not fetch match " + str(match['gameId']) + "\n"
+        continue
     matches.append(matchDetails)
+
 
 # insert new matches into the DB
 lib.db_insertMatches(matches, roster)
