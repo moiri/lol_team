@@ -278,7 +278,7 @@ def api_getTeamRoster(myTeam):
     joinDates = {}
     for summoner in myTeam['roster']['memberList']:
         idList += str(summoner['playerId']) + ','
-        joinDates[summoner['playerId']] = summoner['joinDate']
+        joinDates[summoner['playerId']] = None if 'joinDate' not in summoner else summoner['joinDate']
     idList[:-1]
     api_fetch(['-p', idList])
 
