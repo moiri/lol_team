@@ -135,7 +135,7 @@ function getWinrate(data, summonerName, cb) {
             '</table>'
         $('.content').html(table_title);
         $.each(json.champions, function (idx, champion) {
-            var table = '<tr id="champion-"' + champion.id + '>'
+            var table = '<tr id="champion-' + champion.id + '">'
                 + '<td>' + champion.name + '</td>';
             for (attr in champion.stats) {
                 if (champion.stats[attr] === "Infinity")
