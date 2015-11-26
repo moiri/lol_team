@@ -11,6 +11,9 @@ matches = []
 team_new = lib.api_getTeam( lib.myTeamId )
 roster = lib.api_getTeamRoster(team_new)
 
+# update champion file
+lib.api_fetch(['-c', '-o', lib.data_dir + "champion.json"])
+
 for match in team_new['matchHistory']:
     # if there is already a match.json file go to the next id
     if os.path.isfile(lib.data_dir + str(match['gameId']) + '_match.json'):

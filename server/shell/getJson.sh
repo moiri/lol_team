@@ -33,6 +33,7 @@ Options:
 -l, --timeline             add timeline to JSON object (*)
 -s, --team-summoner [ID]   get teams by summoner ID
 -p, --summoner [ID]        get summoner infos by comma seperated IDs
+-c, --champion             get champion information
 -o, --output [FILE]        write output to file
 
 EOF
@@ -43,7 +44,8 @@ SCRIPT=$(readlink -f "$0")
 # Absolute path this script is in, thus /home/user/bin
 SCRIPTPATH=$(dirname "$SCRIPT")
 key="api_key="$(cat $SCRIPTPATH/../private/key)
-url_base="https://euw.api.pvp.net/api/lol/euw/"
+url_base="https://euw.api.pvp.net/api/lol/"
+url_region="euw/"
 url_api=""
 option=""
 url=""
@@ -120,6 +122,11 @@ while [ $# -gt 0 ] ; do
             output_def="summoners"
             shift
             ;;
+        -c|--champion)
+            url_api="v1.2/champion/"
+            url_base="https://global.api.pvp.net/api/lol/static-data/"
+            output_def="champion"
+            ;;
         -o|--output)
             output="$2"
             shift
@@ -143,13 +150,13 @@ elif [ -z "$url_api" ] ; then
     output_def=${my_date}_status
     url="http://status.leagueoflegends.com/shards"
 else
-    url=$url_base$url_api$id?$option$key
+    url=$url_base$url_region$url_api$id?$option$key
 fi
 if [ -z "$output" ]; then
     output=${SCRIPTPATH}/${output_path}${output_def}${output_suffix}.json
 fi
 
-echo "fetch data from API: ${url_api}${id}?${option}key=..."
+echo "fetch data from API: $url_base$url_region${url_api}${id}?${option}key=..."
 json=$(curl --request GET $url)
 output=$(readlink -m $output)
 echo "saved in file "$output"\n"
