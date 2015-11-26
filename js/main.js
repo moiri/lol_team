@@ -1,6 +1,6 @@
 $(document).ready(function() {
     var data = {};
-    data.season = "SEASON2015";
+    data.season = "PRESEASON2016";
     data.queueType = "RANKED_TEAM_5x5";
     $.getJSON('data/team.json', function(team) {
         $.getJSON('data/summoners.json', function(summoners) {
